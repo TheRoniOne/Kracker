@@ -1,6 +1,6 @@
 # build main
 build:
-    go run cmd/kraker/main.go
+    go run cmd/main.go
 
 tidy:
     go mod tidy
