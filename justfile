@@ -12,12 +12,11 @@ make-migrations MIGRATION_NAME:
         --dev-url "docker://postgres/16/dev?search_path=public"
 
 migrate:
-    atlas schema apply \
-        --env turso \
-        --to "file://db/schema.hcl"
+    atlas migrate apply \
+        --env local
 
 test:
-    atlas schema apply \
+    atlas migrate apply \
         --url "sqlite://test.db" \
         --to "file://db/schema.hcl" \
         --dev-url "docker://postgres/16/dev?search_path=public" \
