@@ -4,15 +4,14 @@ schema "main" {
 table "users" {
   schema = schema.main
   column "id" {
+    type = bigserial
     null = false
-    type = integer
-    auto_increment = true
   }
   primary_key  {
     columns = [column.id]
   }
   index "idx_id" {
-    columns = [ 
+    columns = [
       column.id
      ]
   }
