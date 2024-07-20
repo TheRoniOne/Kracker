@@ -18,7 +18,12 @@ table "users" {
   }
 
   column "username" {
-    type = text(255)
+    type = text
+    null = false
+  }
+
+  column "email" {
+    type = text
     null = false
   }
 
@@ -28,12 +33,12 @@ table "users" {
   }
 
   column "firstname" {
-    type = text(50)
+    type = text
     null = false
   }
 
   column "lastname" {
-    type = text(50)
+    type = text
     null = false
   }
 }
