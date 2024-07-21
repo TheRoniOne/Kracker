@@ -10,5 +10,5 @@ func SetUpRoutes(app *echo.Echo, queries *sqlc.Queries) {
 	group.GET("/say-hello", SayHello)
 
 	userHandler := UserHandler{queries: queries}
-	group.POST("/user/register", userHandler.Register)
+	group.POST("/user/create", userHandler.Create)
 }

@@ -11,7 +11,7 @@ type UserHandler struct {
 	queries *sqlc.Queries
 }
 
-func (h *UserHandler) Register(c echo.Context) error {
+func (h *UserHandler) Create(c echo.Context) error {
 	var user sqlc.CreateUserParams
 
 	err := c.Bind(&user)
