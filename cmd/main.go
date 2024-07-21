@@ -10,18 +10,18 @@ import (
 	"github.com/labstack/echo/v4"
 )
 
-var DBPool *pgxpool.Pool
+var dBPool *pgxpool.Pool
 
 func init() {
 	initializers.LoadEnvVars()
-	DBPool := initializers.ConnectToDB(os.Getenv("DB_USER"), os.Getenv("DB_PASSWORD"), os.Getenv("DB_HOST"), os.Getenv("DB_PORT"), os.Getenv("DB_NAME"))
+	dBPool = initializers.ConnectToDB(os.Getenv("DB_USER"), os.Getenv("DB_PASSWORD"), os.Getenv("DB_HOST"), os.Getenv("DB_PORT"), os.Getenv("DB_NAME"))
 }
 
 func main() {
-	defer DBPool.Close()
+	defer dBPool.Close()
 
 	e := echo.New()
-	queries := sqlc.New(DBPool)
+	queries := sqlc.New(dBPool)
 	handlers.SetUpRoutes(e, queries)
 
 	e.Logger.Fatal(e.Start(":1323"))
