@@ -21,8 +21,7 @@ func init() {
 	dbPool, err = pgxpool.New(context.Background(), connStr)
 
 	if err != nil {
-		fmt.Fprintf(os.Stderr, "Unable to create connection pool: %v\n", err)
-		os.Exit(1)
+		panic(fmt.Errorf("unable to create connection pool: %v", err))
 	}
 }
 
