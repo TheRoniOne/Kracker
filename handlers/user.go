@@ -16,10 +16,13 @@ func (h *UserHandler) Register(c echo.Context) error {
 
 	err := c.Bind(&user)
 	if err != nil {
-		return c.String(http.StatusBadRequest, "bad request")
+		return echo.NewHTTPError(http.StatusBadRequest, "Bad request")
 	}
 
-	h.queries.CreateUser(c.Request().Context(), user)
+	_, err = h.queries.CreateUser(c.Request().Context(), user)
+	if err != nil {
+		return err
+	}
 
 	return c.String(http.StatusCreated, "User registered successfully")
 }
