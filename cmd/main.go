@@ -1,6 +1,8 @@
 package main
 
 import (
+	"context"
+	"fmt"
 	"os"
 
 	"github.com/TheRoniOne/Kracker/db/sqlc"
@@ -10,18 +12,25 @@ import (
 	"github.com/labstack/echo/v4"
 )
 
-var dBPool *pgxpool.Pool
+var dbPool *pgxpool.Pool
 
 func init() {
+	var err error
 	initializers.LoadEnvVars()
-	dBPool = initializers.ConnectToDB(os.Getenv("DB_USER"), os.Getenv("DB_PASSWORD"), os.Getenv("DB_HOST"), os.Getenv("DB_PORT"), os.Getenv("DB_NAME"))
+	connStr := fmt.Sprintf("postgres://%s:%s@%s:%s/%s", os.Getenv("DB_USER"), os.Getenv("DB_PASSWORD"), os.Getenv("DB_HOST"), os.Getenv("DB_PORT"), os.Getenv("DB_NAME"))
+	dbPool, err = pgxpool.New(context.Background(), connStr)
+
+	if err != nil {
+		fmt.Fprintf(os.Stderr, "Unable to create connection pool: %v\n", err)
+		os.Exit(1)
+	}
 }
 
 func main() {
-	defer dBPool.Close()
+	defer dbPool.Close()
 
 	e := echo.New()
-	queries := sqlc.New(dBPool)
+	queries := sqlc.New(dbPool)
 	handlers.SetUpRoutes(e, queries)
 
 	e.Logger.Fatal(e.Start(":1323"))
