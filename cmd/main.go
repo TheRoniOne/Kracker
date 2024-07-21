@@ -4,19 +4,22 @@ import (
 	"github.com/TheRoniOne/Kracker/db/sqlc"
 	"github.com/TheRoniOne/Kracker/handlers"
 	"github.com/TheRoniOne/Kracker/initializers"
+	"github.com/jackc/pgx/v5/pgxpool"
 	"github.com/labstack/echo/v4"
 )
 
+var DBPool *pgxpool.Pool
+
 func init() {
 	initializers.LoadEnvVars()
-	initializers.ConnectToDB()
+	DBPool := initializers.ConnectToDB()
 }
 
 func main() {
-	defer initializers.DBPool.Close()
+	defer DBPool.Close()
 	e := echo.New()
 
-	queries := sqlc.New(initializers.DBPool)
+	queries := sqlc.New(DBPool)
 
 	handlers.SetUpRoutes(e, queries)
 
