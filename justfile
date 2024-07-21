@@ -1,3 +1,5 @@
+set dotenv-filename := ".env.local"
+
 build:
     docker build --pull -f deploy/Dockerfile -t kracker . \
     && docker run -p 1323:1323 -it --rm --name kracker-instance kracker
@@ -13,7 +15,8 @@ make-migrations MIGRATION_NAME:
 
 migrate:
     atlas migrate apply \
-        --env local
+        --dir "file://db/migrations" \
+        --url "postgres://$DB_USER:$DB_PASSWORD@$DB_HOST:$DB_PORT/$DB_NAME?search_path=public&sslmode=disable"
 
 test:
     go test -v ./...
