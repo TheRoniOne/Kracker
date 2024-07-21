@@ -11,4 +11,4 @@ RUN go build -v -o /app/bin ./...
 
 EXPOSE 1323
 
-CMD ["app"]
+CMD ["bin/cmd"]

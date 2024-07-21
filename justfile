@@ -1,6 +1,6 @@
 build:
     docker build --pull -f deploy/Dockerfile -t kracker . \
-    && docker run -it --rm --name my-running-app my-golang-app
+    && docker run -it --rm --name kracker-instance kracker
 
 tidy:
     go mod tidy
