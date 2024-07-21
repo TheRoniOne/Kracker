@@ -4,6 +4,7 @@ import (
 	"context"
 	"net/http"
 	"net/http/httptest"
+	"path/filepath"
 	"strings"
 	"testing"
 	"time"
@@ -24,8 +25,11 @@ func TestUserCreate(t *testing.T) {
 	dbUser := "postgres"
 	dbPassword := "postgres123"
 
+	migrations, _ := filepath.Glob("db/migrations/*.sql")
+
 	pgContainer, err := postgres.Run(ctx,
 		"postgres:16-alpine",
+		postgres.WithInitScripts(migrations...),
 		postgres.WithDatabase(dbName),
 		postgres.WithUsername(dbUser),
 		postgres.WithPassword(dbPassword),

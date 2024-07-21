@@ -16,8 +16,4 @@ migrate:
         --env local
 
 test:
-    atlas migrate apply \
-        --url "sqlite://test.db" \
-        --to "file://db/schema.hcl" \
-        --dev-url "docker://postgres/16/dev?search_path=public" \
-    && go test
+    go test -v ./...
