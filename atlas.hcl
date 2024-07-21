@@ -3,7 +3,7 @@ data "template_dir" "migrations" {
   vars = {}
 }
 
-env "local" {
+env "dev" {
   url = "docker://postgres/16/dev?search_path=public"
   migration {
     dir = data.template_dir.migrations.url
