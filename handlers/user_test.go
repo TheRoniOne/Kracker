@@ -5,13 +5,12 @@ import (
 	"encoding/json"
 	"net/http"
 	"net/http/httptest"
-	"path/filepath"
 	"strings"
 	"testing"
 	"time"
 
+	"github.com/TheRoniOne/Kracker/db"
 	"github.com/TheRoniOne/Kracker/db/sqlc"
-	"github.com/TheRoniOne/Kracker/handlers"
 	"github.com/jackc/pgx/v5/pgxpool"
 	"github.com/labstack/echo/v4"
 	"github.com/stretchr/testify/assert"
@@ -26,11 +25,9 @@ func TestUserCreate(t *testing.T) {
 	dbUser := "postgres"
 	dbPassword := "postgres123"
 
-	migrations, _ := filepath.Glob("../../db/migrations/*.sql")
-
 	pgContainer, err := postgres.Run(ctx,
 		"postgres:16-alpine",
-		postgres.WithInitScripts(migrations...),
+		postgres.WithInitScripts(db.Migrations...),
 		postgres.WithDatabase(dbName),
 		postgres.WithUsername(dbUser),
 		postgres.WithPassword(dbPassword),
@@ -72,7 +69,7 @@ func TestUserCreate(t *testing.T) {
 	rec := httptest.NewRecorder()
 	echoContext := e.NewContext(req, rec)
 
-	handler := handlers.UserHandler{Queries: queries}
+	handler := UserHandler{Queries: queries}
 	if assert.NoError(t, handler.Create(echoContext)) {
 		assert.Equal(t, http.StatusCreated, rec.Code)
 
