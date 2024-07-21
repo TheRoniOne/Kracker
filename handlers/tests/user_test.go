@@ -2,6 +2,7 @@ package handlers
 
 import (
 	"context"
+	"encoding/json"
 	"net/http"
 	"net/http/httptest"
 	"path/filepath"
@@ -25,7 +26,7 @@ func TestUserCreate(t *testing.T) {
 	dbUser := "postgres"
 	dbPassword := "postgres123"
 
-	migrations, _ := filepath.Glob("db/migrations/*.sql")
+	migrations, _ := filepath.Glob("../../db/migrations/*.sql")
 
 	pgContainer, err := postgres.Run(ctx,
 		"postgres:16-alpine",
@@ -56,7 +57,17 @@ func TestUserCreate(t *testing.T) {
 	e := echo.New()
 	queries := sqlc.New(dbPool)
 
-	req := httptest.NewRequest(http.MethodPost, "/", strings.NewReader(`{"username": "test", "email": "test", "salted_hash": "test", "firstname": "test", "lastname": "test"}`))
+	userData := sqlc.CreateUserParams{
+		Username:   "test",
+		Email:      "test",
+		SaltedHash: "test",
+		Firstname:  "test",
+		Lastname:   "test",
+	}
+
+	j, _ := json.Marshal(userData)
+
+	req := httptest.NewRequest(http.MethodPost, "/", strings.NewReader(string(j)))
 	req.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
 	rec := httptest.NewRecorder()
 	echoContext := e.NewContext(req, rec)
@@ -66,7 +77,13 @@ func TestUserCreate(t *testing.T) {
 		assert.Equal(t, http.StatusCreated, rec.Code)
 
 		users, _ := queries.ListUsers(ctx)
-
 		assert.Equal(t, 1, len(users))
+
+		user := users[0]
+		assert.Equal(t, userData.Username, user.Username)
+		assert.Equal(t, userData.Email, user.Email)
+		assert.Equal(t, userData.SaltedHash, user.SaltedHash)
+		assert.Equal(t, userData.Firstname, user.Firstname)
+		assert.Equal(t, userData.Lastname, user.Lastname)
 	}
 }
