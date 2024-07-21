@@ -1,6 +1,6 @@
 build:
     docker build --pull -f deploy/Dockerfile -t kracker . \
-    && docker run -it --rm --name kracker-instance kracker
+    && docker run -p 1323:1323 -it --rm --name kracker-instance kracker
 
 tidy:
     go mod tidy
