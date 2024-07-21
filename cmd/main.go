@@ -30,6 +30,8 @@ func main() {
 	defer dbPool.Close()
 
 	e := echo.New()
+	e.Debug = os.Getenv("DEBUG") == "true"
+
 	queries := sqlc.New(dbPool)
 	handlers.SetUpRoutes(e, queries)
 

@@ -5,6 +5,6 @@ services:
       - "1323:1323"
 
   db:
-    image: "postgres:16"
+    image: "postgres:16-alpine"
     ports:
       - "5432:5432"
