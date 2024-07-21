@@ -9,6 +9,6 @@ func SetUpRoutes(app *echo.Echo, queries *sqlc.Queries) {
 	group := app.Group("/api")
 	group.GET("/say-hello", SayHello)
 
-	userHandler := UserHandler{queries: queries}
+	userHandler := UserHandler{Queries: queries}
 	group.POST("/user/create", userHandler.Create)
 }

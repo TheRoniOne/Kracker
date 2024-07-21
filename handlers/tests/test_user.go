@@ -57,7 +57,12 @@ func TestUserCreate(t *testing.T) {
 	rec := httptest.NewRecorder()
 	echoContext := e.NewContext(req, rec)
 
-	handler := handlers.UserHandler{queries: queries}
+	handler := handlers.UserHandler{Queries: queries}
+	if assert.NoError(t, handler.Create(echoContext)) {
+		assert.Equal(t, http.StatusCreated, rec.Code)
 
-	handler.Create(echoContext)
+		users, _ := queries.ListUsers(ctx)
+
+		assert.Equal(t, 1, len(users))
+	}
 }

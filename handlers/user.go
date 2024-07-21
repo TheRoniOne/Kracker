@@ -8,7 +8,7 @@ import (
 )
 
 type UserHandler struct {
-	queries *sqlc.Queries
+	Queries *sqlc.Queries
 }
 
 func (h *UserHandler) Create(c echo.Context) error {
@@ -19,7 +19,7 @@ func (h *UserHandler) Create(c echo.Context) error {
 		return echo.NewHTTPError(http.StatusBadRequest, "Bad request")
 	}
 
-	_, err = h.queries.CreateUser(c.Request().Context(), user)
+	_, err = h.Queries.CreateUser(c.Request().Context(), user)
 	if err != nil {
 		return err
 	}
