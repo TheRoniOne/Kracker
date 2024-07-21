@@ -12,7 +12,7 @@ locals {
 }
 
 env "local" {
-  url = "postgres://${local.db_user}:${local.db_password}@${local.db_host}:${local.db_port}/${local.db_user}?search_path=public&sslmode=disable"
+  url = "postgres://${local.db_user}:${local.db_password}@${local.db_host}:${local.db_port}/${local.db_name}?search_path=public&sslmode=disable"
   migration {
     dir = data.template_dir.migrations.url
   }
