@@ -4,7 +4,7 @@ services:
     ports:
       - "1323:1323"
     depends_on:
-      - db
+      - db-migrate
     environment:
       - DB_USER=${DB_USER}
       - DB_PASSWORD=${DB_PASSWORD}
@@ -24,6 +24,28 @@ services:
       - POSTGRES_DB=${DB_NAME}
     networks:
       - kracker
+
+  db-migrate:
+    image: arigaio/atlas:0.25.0-community
+    command: >
+      migrate lint --dev-url "docker://postgres/16/dev?search_path=public" &&
+      atlasmigrate apply
+      --url "postgres://$DB_USER:$DB_PASSWORD@$DB_HOST:$DB_PORT/$DB_NAME?search_path=public&sslmode=disable"
+    depends_on:
+      - db
+    volumes:
+      - migrations/:/migrations
+    environment:
+      - DB_USER=${DB_USER}
+      - DB_PASSWORD=${DB_PASSWORD}
+      - DB_NAME=${DB_NAME}
+      - DB_HOST=db
+      - DB_PORT=${DB_PORT}
+    networks:
+      - kracker
+
+volumes:
+  migrations:
 
 networks:
   kracker:
