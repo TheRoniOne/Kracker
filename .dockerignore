@@ -1,3 +1,5 @@
 justfile
 LICENSE
 README.md
+compose.*
+Dockerfile
