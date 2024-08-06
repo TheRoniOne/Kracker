@@ -1,6 +1,7 @@
-# build main
+set dotenv-filename := ".env.local"
+
 build:
-    go run cmd/main.go
+    docker compose -f compose.local.yaml up
 
 tidy:
     go mod tidy
@@ -13,7 +14,8 @@ make-migrations MIGRATION_NAME:
 
 migrate:
     atlas migrate apply \
-        --env local
+        --dir "file://db/migrations" \
+        --url "postgres://$DB_USER:$DB_PASSWORD@$DB_HOST:$DB_PORT/$DB_NAME?search_path=public&sslmode=disable"
 
 test:
     go test -v ./...
