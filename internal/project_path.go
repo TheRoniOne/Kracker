@@ -1,4 +1,4 @@
-package projectpath
+package internal
 
 import (
 	"path/filepath"
@@ -8,5 +8,5 @@ import (
 var (
 	_, b, _, _ = runtime.Caller(0)
 
-	Root = filepath.Join(filepath.Dir(b), "../")
+	RootPath = filepath.Join(filepath.Dir(b), "../")
 )
