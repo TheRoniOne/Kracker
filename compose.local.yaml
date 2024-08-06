@@ -1,19 +1,4 @@
 services:
-  web:
-    build: .
-    ports:
-      - "1323:1323"
-    depends_on:
-      - db-migrate
-    environment:
-      - DB_USER=${DB_USER}
-      - DB_PASSWORD=${DB_PASSWORD}
-      - DB_NAME=${DB_NAME}
-      - DB_HOST=db
-      - DB_PORT=${DB_PORT}
-    networks:
-      - kracker
-
   db:
     image: "postgres:16-alpine"
     ports:
@@ -25,15 +10,12 @@ services:
     networks:
       - kracker
 
-  db-migrate:
-    image: arigaio/atlas:0.25.0-community
-    command: >
-      migrate apply
-      --url "postgres://$DB_USER:$DB_PASSWORD@$DB_HOST:$DB_PORT/$DB_NAME?search_path=public&sslmode=disable"
+  web:
+    build: .
+    ports:
+      - "1323:1323"
     depends_on:
       - db
-    volumes:
-      - ./db/migrations/:/migrations
     environment:
       - DB_USER=${DB_USER}
       - DB_PASSWORD=${DB_PASSWORD}
