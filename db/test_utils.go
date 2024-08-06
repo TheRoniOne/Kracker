@@ -5,14 +5,14 @@ import (
 	"os"
 	"path/filepath"
 
-	projectpath "github.com/TheRoniOne/Kracker/internal"
+	"github.com/TheRoniOne/Kracker/internal"
 )
 
 var Migrations []string
 
 func init() {
 	var err error
-	migrationsPath := filepath.Join(projectpath.Root, "db/migrations/*.sql")
+	migrationsPath := filepath.Join(internal.RootPath, "db/migrations/*.sql")
 	Migrations, err = filepath.Glob(migrationsPath)
 
 	if err != nil {
