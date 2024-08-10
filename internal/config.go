@@ -1,10 +1,10 @@
 package internal
 
 import (
+	"fmt"
+	"log/slog"
 	"os"
 	"strings"
-
-	"github.com/labstack/gommon/log"
 )
 
 var (
@@ -27,10 +27,12 @@ func getSecret(key string) string {
 
 	contents, err := os.ReadFile(path)
 	if err != nil {
-		log.Errorf("Failed to read secret file: %s", path)
+		logger := slog.Default()
+
+		logger.Error(fmt.Sprintf("Failed to read secret file: %s", path))
 
 		env_var, _ := strings.CutSuffix(key, "_SECRET")
-		log.Infof("Using env variable: %s as secret", env_var)
+		logger.Info(fmt.Sprintf("Using env variable: %s as secret", env_var))
 
 		return os.Getenv(env_var)
 	}
