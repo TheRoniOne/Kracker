@@ -34,12 +34,9 @@ func getSecret(key string) string {
 
 	contents, err := os.ReadFile(path)
 	if err != nil {
-		logger := slog.Default()
-
-		logger.Error(fmt.Sprintf("Failed to read secret file: %s", path))
-
+		slog.Error(fmt.Sprintf("Failed to read secret file: %s", path))
 		envVar, _ := strings.CutSuffix(key, "_SECRET")
-		logger.Info(fmt.Sprintf("Using env variable %s: as secret", envVar))
+		slog.Info(fmt.Sprintf("Using env variable %s: as secret", envVar))
 
 		return os.Getenv(envVar)
 	}
@@ -56,9 +53,7 @@ func parseIntEnv(key string) int {
 
 	result, err := strconv.Atoi(value)
 	if err != nil {
-		logger := slog.Default()
-
-		logger.Error(fmt.Sprintf("Failed to parse %s: %v", key, err))
+		slog.Error(fmt.Sprintf("Failed to parse %s: %v", key, err))
 		panic(err)
 	}
 
