@@ -4,18 +4,25 @@ import (
 	"fmt"
 	"log/slog"
 	"os"
+	"strconv"
 	"strings"
+	"time"
 )
 
 var (
-	DB_HOST = os.Getenv("DB_HOST")
-	DB_PORT = os.Getenv("DB_PORT")
-	DB_NAME = os.Getenv("DB_NAME")
+	DBHost = os.Getenv("DB_HOST")
+	DBPort = os.Getenv("DB_PORT")
+	DBName = os.Getenv("DB_NAME")
 
-	DB_USER     = os.Getenv("DB_USER")
-	DB_PASSWORD = getSecret("DB_PASSWORD")
+	DBUser     = os.Getenv("DB_USER")
+	DBPassword = getSecret("DB_PASSWORD")
 
-	DEBUG = os.Getenv("DEBUG") == "true"
+	Debug = os.Getenv("DEBUG") == "true"
+
+	JWTSecret   = getSecret("JWT_SECRET")
+	JWTLifetime = time.Hour * time.Duration(parseIntEnv("JWT_LIFETIME_HOURS"))
+
+	RateLimit = parseIntEnv("RATE_LIMIT")
 )
 
 func getSecret(key string) string {
@@ -31,11 +38,29 @@ func getSecret(key string) string {
 
 		logger.Error(fmt.Sprintf("Failed to read secret file: %s", path))
 
-		env_var, _ := strings.CutSuffix(key, "_SECRET")
-		logger.Info(fmt.Sprintf("Using env variable: %s as secret", env_var))
+		envVar, _ := strings.CutSuffix(key, "_SECRET")
+		logger.Info(fmt.Sprintf("Using env variable %s: as secret", envVar))
 
-		return os.Getenv(env_var)
+		return os.Getenv(envVar)
 	}
 
 	return strings.TrimSpace(string(contents))
+}
+
+func parseIntEnv(key string) int {
+	value := os.Getenv(key)
+
+	if value == "" {
+		return 0
+	}
+
+	result, err := strconv.Atoi(value)
+	if err != nil {
+		logger := slog.Default()
+
+		logger.Error(fmt.Sprintf("Failed to parse %s: %v", key, err))
+		panic(err)
+	}
+
+	return result
 }

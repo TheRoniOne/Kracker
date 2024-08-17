@@ -10,6 +10,9 @@ import (
 	"github.com/TheRoniOne/Kracker/handlers"
 	"github.com/TheRoniOne/Kracker/internal"
 	"github.com/TheRoniOne/Kracker/middleware"
+	echomiddleware "github.com/labstack/echo/v4/middleware"
+	"golang.org/x/time/rate"
+
 	"github.com/jackc/pgx/v5/pgxpool"
 	"github.com/labstack/echo/v4"
 )
@@ -20,14 +23,17 @@ var (
 )
 
 func init() {
-	slog.SetDefault(slog.New(slog.NewJSONHandler(os.Stdout, nil)))
+	var slogOpts *slog.HandlerOptions
+	if internal.Debug {
+		slogOpts = &slog.HandlerOptions{Level: slog.LevelDebug}
+	}
+	slog.SetDefault(slog.New(slog.NewJSONHandler(os.Stdout, slogOpts)))
 
 	logger = slog.Default()
 
 	var err error
-	connStr := fmt.Sprintf("postgres://%s:%s@%s:%s/%s", internal.DB_USER, internal.DB_PASSWORD, internal.DB_HOST, internal.DB_PORT, internal.DB_NAME)
+	connStr := fmt.Sprintf("postgres://%s:%s@%s:%s/%s", internal.DBUser, internal.DBPassword, internal.DBHost, internal.DBPort, internal.DBName)
 	dbPool, err = pgxpool.New(context.Background(), connStr)
-
 	if err != nil {
 		logger.Error(fmt.Sprintf("Unable to create connection pool: %v", err))
 		panic(err)
@@ -39,8 +45,10 @@ func main() {
 
 	e := echo.New()
 
-	e.Debug = internal.DEBUG
+	e.Debug = internal.Debug
 	e.Use(middleware.LoggingMiddleware(logger))
+	e.Use(echomiddleware.Recover())
+	e.Use(echomiddleware.RateLimiter(echomiddleware.NewRateLimiterMemoryStore(rate.Limit(internal.RateLimit))))
 
 	queries := sqlc.New(dbPool)
 	handlers.SetUpRoutes(e, queries)
