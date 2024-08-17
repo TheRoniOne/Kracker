@@ -1,7 +1,7 @@
 set dotenv-filename := ".env.local"
 
 build:
-    docker compose -f compose.local.yaml up
+    docker compose -f compose.local.yaml up --build
 
 tidy:
     go mod tidy
@@ -19,3 +19,6 @@ migrate:
 
 test:
     go test -v ./...
+
+lint:
+    golangci-lint run
