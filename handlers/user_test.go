@@ -14,6 +14,7 @@ import (
 	"github.com/jackc/pgx/v5/pgxpool"
 	"github.com/labstack/echo/v4"
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 	"github.com/testcontainers/testcontainers-go"
 	"github.com/testcontainers/testcontainers-go/modules/postgres"
 	"github.com/testcontainers/testcontainers-go/wait"
@@ -46,10 +47,10 @@ func TestUserCreate(t *testing.T) {
 	})
 
 	connStr, err := pgContainer.ConnectionString(ctx, "sslmode=disable")
-	assert.NoError(t, err)
+	require.NoError(t, err)
 
 	dbPool, err := pgxpool.New(context.Background(), connStr)
-	assert.NoError(t, err)
+	require.NoError(t, err)
 
 	e := echo.New()
 	queries := sqlc.New(dbPool)
@@ -74,7 +75,7 @@ func TestUserCreate(t *testing.T) {
 		assert.Equal(t, http.StatusCreated, rec.Code)
 
 		users, _ := queries.ListUsers(ctx)
-		assert.Equal(t, 1, len(users))
+		assert.Len(t, users, 1)
 
 		user := users[0]
 		assert.Equal(t, userData.Username, user.Username)
