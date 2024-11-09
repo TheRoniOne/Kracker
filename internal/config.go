@@ -25,7 +25,8 @@ var (
 
 	RateLimit = parseIntEnv("RATE_LIMIT", 10)
 
-	RootPath = getRootPath()
+	RootPath          = getRootPath()
+	SessionMaxAgeDays = parseIntEnv("SESSION_MAX_AGE_DAYS", 30)
 )
 
 func getSecret(key string) string {
