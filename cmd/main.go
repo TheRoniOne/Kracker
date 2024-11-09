@@ -7,8 +7,8 @@ import (
 	"net/url"
 	"os"
 
+	"github.com/TheRoniOne/Kracker/api"
 	"github.com/TheRoniOne/Kracker/db/sqlc"
-	"github.com/TheRoniOne/Kracker/handlers"
 	"github.com/TheRoniOne/Kracker/internal"
 	"github.com/TheRoniOne/Kracker/middleware"
 	echomiddleware "github.com/labstack/echo/v4/middleware"
@@ -53,7 +53,7 @@ func main() {
 	e.Use(echomiddleware.Recover())
 
 	queries := sqlc.New(dbPool)
-	handlers.SetUpRoutes(e, queries)
+	api.SetUpRoutes(e, queries)
 
 	e.Logger.Fatal(e.Start(":1323"))
 }
