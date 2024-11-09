@@ -21,7 +21,7 @@ var (
 
 	Debug = os.Getenv("DEBUG") == "true"
 
-	TimeLocation = getTimeLocation("America/Lima")
+	TimeLocation = getTimeLocation("TIME_LOCATION")
 
 	RateLimit = parseIntEnv("RATE_LIMIT", 10)
 
