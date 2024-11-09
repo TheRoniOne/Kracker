@@ -7,7 +7,7 @@ COPY go.mod go.sum ./
 RUN go mod download && go mod verify
 
 COPY . .
-RUN go build -v -o /app/bin ./...
+RUN mkdir -p /app/bin && go build -v -o /app/bin ./...
 
 EXPOSE 1323
 
