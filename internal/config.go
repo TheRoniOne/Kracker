@@ -22,7 +22,8 @@ var (
 
 	TimeLocation = getTimeLocation("TIME_LOCATION")
 
-	RateLimit = parseIntEnv("RATE_LIMIT")
+	RateLimit         = parseIntEnv("RATE_LIMIT")
+	SessionMaxAgeDays = parseIntEnv("SESSION_MAX_AGE_DAYS")
 )
 
 func getSecret(key string) string {
