@@ -3,6 +3,7 @@ module github.com/TheRoniOne/Kracker
 go 1.22.0
 
 require (
+	github.com/alexedwards/argon2id v1.0.0
 	github.com/jackc/pgx/v5 v5.6.0
 	github.com/labstack/echo/v4 v4.11.4
 	github.com/stretchr/testify v1.9.0

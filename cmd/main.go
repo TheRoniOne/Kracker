@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"log/slog"
+	"net/url"
 	"os"
 
 	"github.com/TheRoniOne/Kracker/db/sqlc"
@@ -32,7 +33,7 @@ func init() {
 	logger = slog.Default()
 
 	var err error
-	connStr := fmt.Sprintf("postgres://%s:%s@%s:%s/%s", internal.DBUser, internal.DBPassword, internal.DBHost, internal.DBPort, internal.DBName)
+	connStr := fmt.Sprintf("postgres://%s:%s@%s:%s/%s", internal.DBUser, url.QueryEscape(internal.DBPassword), internal.DBHost, internal.DBPort, internal.DBName)
 	dbPool, err = pgxpool.New(context.Background(), connStr)
 	if err != nil {
 		logger.Error(fmt.Sprintf("Unable to create connection pool: %v", err))
@@ -46,9 +47,10 @@ func main() {
 	e := echo.New()
 
 	e.Debug = internal.Debug
+	e.Use(echomiddleware.RateLimiter(echomiddleware.NewRateLimiterMemoryStore(rate.Limit(internal.RateLimit))))
+	e.Use(middleware.RequestIDMiddleware(logger))
 	e.Use(middleware.LoggingMiddleware(logger))
 	e.Use(echomiddleware.Recover())
-	e.Use(echomiddleware.RateLimiter(echomiddleware.NewRateLimiterMemoryStore(rate.Limit(internal.RateLimit))))
 
 	queries := sqlc.New(dbPool)
 	handlers.SetUpRoutes(e, queries)

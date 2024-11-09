@@ -27,7 +27,7 @@ func TestUserCreate(t *testing.T) {
 	dbPassword := "postgres123"
 
 	pgContainer, err := postgres.Run(ctx,
-		"postgres:16-alpine",
+		"postgres:17-alpine",
 		postgres.WithInitScripts(db.Migrations...),
 		postgres.WithDatabase(dbName),
 		postgres.WithUsername(dbUser),
