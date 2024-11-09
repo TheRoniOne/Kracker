@@ -5,7 +5,7 @@ import (
 	"github.com/labstack/echo/v4"
 )
 
-func GetUserID(c echo.Context) int64 {
+func GetUserID(_ echo.Context) int64 {
 	return 1 // TODO implement
 }
 
