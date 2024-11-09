@@ -1,8 +1,8 @@
-package handlers
+package api
 
 import (
+	"github.com/TheRoniOne/Kracker/api/models"
 	"github.com/TheRoniOne/Kracker/db/sqlc"
-	"github.com/TheRoniOne/Kracker/handlers/models"
 	"github.com/labstack/echo/v4"
 )
 
