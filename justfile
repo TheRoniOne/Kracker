@@ -10,7 +10,7 @@ make-migrations MIGRATION_NAME:
     atlas migrate diff {{MIGRATION_NAME}} \
         --dir "file://db/migrations" \
         --to "file://db/schema.hcl" \
-        --dev-url "docker://postgres/16/dev?search_path=public"
+        --dev-url "docker://postgres/17/dev?search_path=public"
 
 migrate:
     atlas migrate apply \
