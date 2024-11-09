@@ -19,11 +19,11 @@ RETURNING id, username, email, salted_hash, firstname, lastname
 `
 
 type CreateUserParams struct {
-	Username   string
-	Email      string
-	SaltedHash string
-	Firstname  string
-	Lastname   string
+	Username   string `json:"username"`
+	Email      string `json:"email"`
+	SaltedHash string `json:"salted_hash"`
+	Firstname  string `json:"firstname"`
+	Lastname   string `json:"lastname"`
 }
 
 func (q *Queries) CreateUser(ctx context.Context, arg CreateUserParams) (User, error) {
@@ -63,6 +63,25 @@ WHERE id = $1 LIMIT 1
 
 func (q *Queries) GetUser(ctx context.Context, id int64) (User, error) {
 	row := q.db.QueryRow(ctx, getUser, id)
+	var i User
+	err := row.Scan(
+		&i.ID,
+		&i.Username,
+		&i.Email,
+		&i.SaltedHash,
+		&i.Firstname,
+		&i.Lastname,
+	)
+	return i, err
+}
+
+const getUserFromUsername = `-- name: GetUserFromUsername :one
+SELECT id, username, email, salted_hash, firstname, lastname FROM Users
+WHERE username = $1 LIMIT 1
+`
+
+func (q *Queries) GetUserFromUsername(ctx context.Context, username string) (User, error) {
+	row := q.db.QueryRow(ctx, getUserFromUsername, username)
 	var i User
 	err := row.Scan(
 		&i.ID,
@@ -117,12 +136,12 @@ WHERE id = $1
 `
 
 type UpdateUserParams struct {
-	ID         int64
-	Username   string
-	Email      string
-	SaltedHash string
-	Firstname  string
-	Lastname   string
+	ID         int64  `json:"id"`
+	Username   string `json:"username"`
+	Email      string `json:"email"`
+	SaltedHash string `json:"salted_hash"`
+	Firstname  string `json:"firstname"`
+	Lastname   string `json:"lastname"`
 }
 
 func (q *Queries) UpdateUser(ctx context.Context, arg UpdateUserParams) error {

@@ -4,6 +4,7 @@ go 1.22.0
 
 require (
 	github.com/alexedwards/argon2id v1.0.0
+	github.com/brianvoe/gofakeit/v7 v7.1.2
 	github.com/google/uuid v1.6.0
 	github.com/jackc/pgx/v5 v5.6.0
 	github.com/labstack/echo/v4 v4.11.4

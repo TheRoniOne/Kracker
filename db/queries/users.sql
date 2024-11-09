@@ -2,6 +2,10 @@
 SELECT * FROM Users
 WHERE id = $1 LIMIT 1;
 
+-- name: GetUserFromUsername :one
+SELECT * FROM Users
+WHERE username = $1 LIMIT 1;
+
 -- name: ListUsers :many
 SELECT * FROM Users;
 

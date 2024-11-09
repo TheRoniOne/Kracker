@@ -5,10 +5,10 @@
 package sqlc
 
 type User struct {
-	ID         int64
-	Username   string
-	Email      string
-	SaltedHash string
-	Firstname  string
-	Lastname   string
+	ID         int64  `json:"id"`
+	Username   string `json:"username"`
+	Email      string `json:"email"`
+	SaltedHash string `json:"salted_hash"`
+	Firstname  string `json:"firstname"`
+	Lastname   string `json:"lastname"`
 }

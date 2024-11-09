@@ -1,4 +1,4 @@
-package handlers
+package models
 
 import (
 	"fmt"
@@ -11,7 +11,8 @@ import (
 )
 
 type UserHandler struct {
-	Queries *sqlc.Queries
+	Queries   *sqlc.Queries
+	GetUserID func(c echo.Context) int64
 }
 
 func (h *UserHandler) Create(c echo.Context) error {
@@ -19,7 +20,7 @@ func (h *UserHandler) Create(c echo.Context) error {
 
 	err := c.Bind(&user)
 	if err != nil {
-		return echo.NewHTTPError(http.StatusBadRequest, "Bad request")
+		return echo.ErrBadRequest
 	}
 
 	params := &argon2id.Params{
@@ -33,17 +34,23 @@ func (h *UserHandler) Create(c echo.Context) error {
 	saltedHash, err := argon2id.CreateHash(user.SaltedHash, params)
 	if err != nil {
 		slog.Error(fmt.Sprintf("Failed to hash password: %v", err))
-
-		return echo.ErrInternalServerError
+		return err
 	}
 	user.SaltedHash = saltedHash
 
 	_, err = h.Queries.CreateUser(c.Request().Context(), user)
 	if err != nil {
-		slog.Error(fmt.Sprintf("Failed to create user: %v", err))
-
-		return echo.ErrInternalServerError
+		return err
 	}
 
 	return c.String(http.StatusCreated, "User registered successfully")
+}
+
+func (h *UserHandler) List(c echo.Context) error {
+	users, err := h.Queries.ListUsers(c.Request().Context())
+	if err != nil {
+		return err
+	}
+
+	return c.JSON(http.StatusOK, users)
 }
