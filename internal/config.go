@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"log/slog"
 	"os"
+	"path/filepath"
 	"strconv"
 	"strings"
 	"time"
@@ -19,26 +20,21 @@ var (
 
 	Debug = os.Getenv("DEBUG") == "true"
 
-	JWTSecret   = getSecret("JWT_SECRET")
-	JWTLifetime = time.Hour * time.Duration(parseIntEnv("JWT_LIFETIME_HOURS"))
+	TimeLocation = getTimeLocation("America/Lima")
 
 	RateLimit = parseIntEnv("RATE_LIMIT")
 )
 
 func getSecret(key string) string {
-	path := os.Getenv(key)
-
-	if path == "" {
-		return ""
-	}
+	path := filepath.Join("/run/secrets", strings.ToLower(key))
 
 	contents, err := os.ReadFile(path)
 	if err != nil {
-		slog.Error(fmt.Sprintf("Failed to read secret file: %s", path))
-		envVar, _ := strings.CutSuffix(key, "_SECRET")
-		slog.Info(fmt.Sprintf("Using env variable %s: as secret", envVar))
+		slog.Error(fmt.Sprintf("Failed to read secret file: %s", path),
+			"error", err)
+		slog.Info(fmt.Sprintf("Using env variable %s: as secret", key))
 
-		return os.Getenv(envVar)
+		return os.Getenv(key)
 	}
 
 	return strings.TrimSpace(string(contents))
@@ -53,9 +49,23 @@ func parseIntEnv(key string) int {
 
 	result, err := strconv.Atoi(value)
 	if err != nil {
-		slog.Error(fmt.Sprintf("Failed to parse %s: %v", key, err))
+		slog.Error(fmt.Sprintf("Failed to parse %s", key),
+			"error", err)
 		panic(err)
 	}
 
 	return result
+}
+
+func getTimeLocation(key string) *time.Location {
+	value := os.Getenv(key)
+
+	loc, err := time.LoadLocation(value)
+	if err != nil {
+		slog.Error("Failed to load time location",
+			"error", err)
+		panic(err)
+	}
+
+	return loc
 }
