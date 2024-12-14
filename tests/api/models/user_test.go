@@ -82,7 +82,7 @@ func TestUserList(t *testing.T) {
 	UserFactory := factories.UserFactory{Queries: queries}
 	UserFactory.CreateOne()
 
-	response, err := http.Post(serverURL+"/api/user/list", "/", strings.NewReader(string("")))
+	response, err := http.Get(serverURL + "/api/user/list")
 	require.NoError(t, err)
 
 	if assert.Equal(t, http.StatusOK, response.StatusCode) {
@@ -91,6 +91,6 @@ func TestUserList(t *testing.T) {
 
 		expected, _ := json.Marshal(users)
 
-		assert.Equal(t, string(expected)+"\n", "")
+		assert.Equal(t, string(expected)+"\n", utils.ReadRespBody(response))
 	}
 }
