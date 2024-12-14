@@ -5,6 +5,7 @@ CREATE TABLE "users" (
     "salted_hash" TEXT NOT NULL,
     "firstname" TEXT NOT NULL,
     "lastname" TEXT NOT NULL,
+    "is_admin" BOOLEAN NOT NULL DEFAULT FALSE,
     PRIMARY KEY ("id")
 );
 

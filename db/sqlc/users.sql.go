@@ -11,11 +11,11 @@ import (
 
 const createUser = `-- name: CreateUser :one
 INSERT INTO Users (
-  username, email, salted_hash, firstname, lastname
+  username, email, salted_hash, firstname, lastname, is_admin
 ) VALUES (
-  $1, $2, $3, $4, $5
+  $1, $2, $3, $4, $5, $6
 )
-RETURNING id, username, email, salted_hash, firstname, lastname
+RETURNING id, username, email, salted_hash, firstname, lastname, is_admin
 `
 
 type CreateUserParams struct {
@@ -24,6 +24,7 @@ type CreateUserParams struct {
 	SaltedHash string `json:"salted_hash"`
 	Firstname  string `json:"firstname"`
 	Lastname   string `json:"lastname"`
+	IsAdmin    bool   `json:"is_admin"`
 }
 
 func (q *Queries) CreateUser(ctx context.Context, arg CreateUserParams) (User, error) {
@@ -33,6 +34,7 @@ func (q *Queries) CreateUser(ctx context.Context, arg CreateUserParams) (User, e
 		arg.SaltedHash,
 		arg.Firstname,
 		arg.Lastname,
+		arg.IsAdmin,
 	)
 	var i User
 	err := row.Scan(
@@ -42,6 +44,7 @@ func (q *Queries) CreateUser(ctx context.Context, arg CreateUserParams) (User, e
 		&i.SaltedHash,
 		&i.Firstname,
 		&i.Lastname,
+		&i.IsAdmin,
 	)
 	return i, err
 }
@@ -57,7 +60,7 @@ func (q *Queries) DeleteUser(ctx context.Context, id int64) error {
 }
 
 const getUser = `-- name: GetUser :one
-SELECT id, username, email, salted_hash, firstname, lastname FROM Users
+SELECT id, username, email, salted_hash, firstname, lastname, is_admin FROM Users
 WHERE id = $1 LIMIT 1
 `
 
@@ -71,12 +74,13 @@ func (q *Queries) GetUser(ctx context.Context, id int64) (User, error) {
 		&i.SaltedHash,
 		&i.Firstname,
 		&i.Lastname,
+		&i.IsAdmin,
 	)
 	return i, err
 }
 
 const getUserFromUsername = `-- name: GetUserFromUsername :one
-SELECT id, username, email, salted_hash, firstname, lastname FROM Users
+SELECT id, username, email, salted_hash, firstname, lastname, is_admin FROM Users
 WHERE username = $1 LIMIT 1
 `
 
@@ -90,12 +94,13 @@ func (q *Queries) GetUserFromUsername(ctx context.Context, username string) (Use
 		&i.SaltedHash,
 		&i.Firstname,
 		&i.Lastname,
+		&i.IsAdmin,
 	)
 	return i, err
 }
 
 const listUsers = `-- name: ListUsers :many
-SELECT id, username, email, salted_hash, firstname, lastname FROM Users
+SELECT id, username, email, salted_hash, firstname, lastname, is_admin FROM Users
 `
 
 func (q *Queries) ListUsers(ctx context.Context) ([]User, error) {
@@ -114,6 +119,7 @@ func (q *Queries) ListUsers(ctx context.Context) ([]User, error) {
 			&i.SaltedHash,
 			&i.Firstname,
 			&i.Lastname,
+			&i.IsAdmin,
 		); err != nil {
 			return nil, err
 		}

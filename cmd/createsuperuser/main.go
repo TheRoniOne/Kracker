@@ -7,12 +7,9 @@ import (
 	"net/url"
 	"os"
 
-	"github.com/TheRoniOne/Kracker/api"
 	"github.com/TheRoniOne/Kracker/db/sqlc"
 	"github.com/TheRoniOne/Kracker/internal"
-
 	"github.com/jackc/pgx/v5/pgxpool"
-	"github.com/labstack/echo/v4"
 )
 
 var (
@@ -39,13 +36,22 @@ func init() {
 }
 
 func main() {
-	defer dbPool.Close()
+	fmt.Println("Enter the details for the superuser account:")
+	username := internal.GetInput("Username")
+	email := internal.GetInput("Email")
+	password := internal.GetInput("Password")
 
-	e := echo.New()
-	err := internal.StartServer(e, ":1323")
+	user := sqlc.CreateUserParams{
+		Username:   username,
+		Email:      email,
+		SaltedHash: password,
+		IsAdmin:    true,
+	}
 
 	queries := sqlc.New(dbPool)
-	api.SetUpRoutes(e, queries)
-
-	e.Logger.Fatal(err)
+	err := internal.CreateUser(user, queries)
+	if err != nil {
+		slog.Error("Failed to create superuser",
+			"error", err)
+	}
 }

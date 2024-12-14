@@ -11,9 +11,9 @@ SELECT * FROM Users;
 
 -- name: CreateUser :one
 INSERT INTO Users (
-  username, email, salted_hash, firstname, lastname
+  username, email, salted_hash, firstname, lastname, is_admin
 ) VALUES (
-  $1, $2, $3, $4, $5
+  $1, $2, $3, $4, $5, $6
 )
 RETURNING *;
 

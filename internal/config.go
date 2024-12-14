@@ -5,6 +5,7 @@ import (
 	"log/slog"
 	"os"
 	"path/filepath"
+	"runtime"
 	"strconv"
 	"strings"
 	"time"
@@ -23,6 +24,8 @@ var (
 	TimeLocation = getTimeLocation("America/Lima")
 
 	RateLimit = parseIntEnv("RATE_LIMIT")
+
+	RootPath = getRootPath()
 )
 
 func getSecret(key string) string {
@@ -68,4 +71,10 @@ func getTimeLocation(key string) *time.Location {
 	}
 
 	return loc
+}
+
+func getRootPath() string {
+	_, b, _, _ := runtime.Caller(0)
+
+	return filepath.Join(filepath.Dir(b), "../")
 }

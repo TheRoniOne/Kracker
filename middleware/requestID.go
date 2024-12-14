@@ -9,12 +9,12 @@ import (
 	"github.com/labstack/gommon/random"
 )
 
-func RequestIDMiddleware(logger *slog.Logger) echo.MiddlewareFunc {
+func RequestIDMiddleware() echo.MiddlewareFunc {
 	return middleware.RequestIDWithConfig(middleware.RequestIDConfig{
 		Generator: func() string {
 			id, err := uuid.NewV7()
 			if err != nil {
-				logger.Error("Failed to generate UUID",
+				slog.Error("Failed to generate UUID",
 					"error", err)
 
 				return random.String(32)

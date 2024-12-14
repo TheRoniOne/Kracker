@@ -11,4 +11,5 @@ type User struct {
 	SaltedHash string `json:"salted_hash"`
 	Firstname  string `json:"firstname"`
 	Lastname   string `json:"lastname"`
+	IsAdmin    bool   `json:"is_admin"`
 }
