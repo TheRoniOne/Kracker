@@ -1,8 +1,10 @@
 package tests
 
 import (
+	"bytes"
 	"context"
 	"encoding/json"
+	"fmt"
 	"net/http"
 	"strings"
 	"testing"
@@ -93,6 +95,9 @@ func TestUserList(t *testing.T) {
 
 		expected, _ := json.Marshal(users)
 
-		assert.Equal(t, string(expected)+"\n", utils.ReadRespBody(response))
+		actual := &bytes.Buffer{}
+		json.Compact(actual, utils.ReadRespBody(response))
+
+		assert.Equal(t, string(expected), fmt.Sprint(actual))
 	}
 }
