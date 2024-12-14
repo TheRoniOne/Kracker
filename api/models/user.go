@@ -14,8 +14,16 @@ type UserHandler struct {
 	Queries *sqlc.Queries
 }
 
+type UserCreateParams struct {
+	Username  string `json:"username"`
+	Email     string `json:"email"`
+	Password  string `json:"password"`
+	Firstname string `json:"firstname"`
+	Lastname  string `json:"lastname"`
+}
+
 func (h *UserHandler) Create(c echo.Context) error {
-	var user sqlc.CreateUserParams
+	var user UserCreateParams
 
 	err := c.Bind(&user)
 	if err != nil {
@@ -30,14 +38,19 @@ func (h *UserHandler) Create(c echo.Context) error {
 		KeyLength:   32,
 	}
 
-	saltedHash, err := argon2id.CreateHash(user.SaltedHash, params)
+	saltedHash, err := argon2id.CreateHash(user.Password, params)
 	if err != nil {
 		slog.Error(fmt.Sprintf("Failed to hash password: %v", err))
 		return err
 	}
-	user.SaltedHash = saltedHash
 
-	_, err = h.Queries.CreateUser(c.Request().Context(), user)
+	_, err = h.Queries.CreateUser(c.Request().Context(), sqlc.CreateUserParams{
+		Username:   user.Username,
+		Email:      user.Email,
+		SaltedHash: saltedHash,
+		Firstname:  user.Firstname,
+		Lastname:   user.Lastname,
+	})
 	if err != nil {
 		return err
 	}

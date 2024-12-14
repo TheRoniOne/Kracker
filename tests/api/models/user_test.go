@@ -8,6 +8,7 @@ import (
 	"testing"
 
 	"github.com/TheRoniOne/Kracker/api"
+	"github.com/TheRoniOne/Kracker/api/models"
 	"github.com/TheRoniOne/Kracker/db/factories"
 	"github.com/TheRoniOne/Kracker/db/sqlc"
 	"github.com/TheRoniOne/Kracker/tests/utils"
@@ -34,12 +35,12 @@ func TestUserCreate(t *testing.T) {
 
 	api.SetUpRoutes(e, queries)
 
-	userData := sqlc.CreateUserParams{
-		Username:   "test",
-		Email:      "test",
-		SaltedHash: "test",
-		Firstname:  "test",
-		Lastname:   "test",
+	userData := models.UserCreateParams{
+		Username:  "test",
+		Email:     "test",
+		Password:  "test",
+		Firstname: "test",
+		Lastname:  "test",
 	}
 
 	j, _ := json.Marshal(userData)
@@ -56,9 +57,10 @@ func TestUserCreate(t *testing.T) {
 		assert.Equal(t, userData.Email, user.Email)
 		assert.Equal(t, userData.Firstname, user.Firstname)
 		assert.Equal(t, userData.Lastname, user.Lastname)
+		assert.False(t, user.IsAdmin)
 
 		userDBData, _ := queries.GetUserFromUsername(ctx, userData.Username)
-		isOk, _ := argon2id.ComparePasswordAndHash(userData.SaltedHash, userDBData.SaltedHash)
+		isOk, _ := argon2id.ComparePasswordAndHash(userData.Password, userDBData.SaltedHash)
 		assert.True(t, isOk)
 	}
 }
