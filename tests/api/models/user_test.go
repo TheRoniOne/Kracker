@@ -4,15 +4,13 @@ import (
 	"context"
 	"encoding/json"
 	"net/http"
-	"net/http/httptest"
 	"strings"
 	"testing"
 
 	"github.com/TheRoniOne/Kracker/api"
-	"github.com/TheRoniOne/Kracker/api/models"
 	"github.com/TheRoniOne/Kracker/db/factories"
 	"github.com/TheRoniOne/Kracker/db/sqlc"
-	"github.com/TheRoniOne/Kracker/internal"
+	"github.com/TheRoniOne/Kracker/tests/utils"
 	"github.com/alexedwards/argon2id"
 	"github.com/jackc/pgx/v5/pgxpool"
 	"github.com/labstack/echo/v4"
@@ -22,7 +20,7 @@ import (
 
 func TestUserCreate(t *testing.T) {
 	ctx := context.Background()
-	connStr := internal.SetUpTestWithDB(ctx, t)
+	connStr := utils.SetUpTestWithDB(ctx, t)
 
 	dbPool, err := pgxpool.New(context.Background(), connStr)
 	require.NoError(t, err)
@@ -30,7 +28,7 @@ func TestUserCreate(t *testing.T) {
 	e := echo.New()
 	queries := sqlc.New(dbPool)
 
-	serverURL := internal.StartTestServer(e)
+	serverURL := utils.StartTestServer(e)
 	require.NotEmpty(t, serverURL)
 	defer e.Close()
 
@@ -67,7 +65,7 @@ func TestUserCreate(t *testing.T) {
 
 func TestUserList(t *testing.T) {
 	ctx := context.Background()
-	connStr := internal.SetUpTestWithDB(ctx, t)
+	connStr := utils.SetUpTestWithDB(ctx, t)
 
 	dbPool, err := pgxpool.New(context.Background(), connStr)
 	require.NoError(t, err)
@@ -75,20 +73,24 @@ func TestUserList(t *testing.T) {
 	e := echo.New()
 	queries := sqlc.New(dbPool)
 
-	req := httptest.NewRequest(http.MethodGet, "/", strings.NewReader(string("")))
-	rec := httptest.NewRecorder()
-	echoContext := e.NewContext(req, rec)
+	serverURL := utils.StartTestServer(e)
+	require.NotEmpty(t, serverURL)
+	defer e.Close()
+
+	api.SetUpRoutes(e, queries)
 
 	UserFactory := factories.UserFactory{Queries: queries}
 	UserFactory.CreateOne()
 
-	handler := models.UserHandler{Queries: queries}
-	if assert.NoError(t, handler.List(echoContext)) {
-		assert.Equal(t, http.StatusOK, rec.Code)
+	response, err := http.Post(serverURL+"/api/user/list", "/", strings.NewReader(string("")))
+	require.NoError(t, err)
+
+	if assert.Equal(t, http.StatusOK, response.StatusCode) {
 
 		users, _ := queries.ListUsers(ctx)
 
 		expected, _ := json.Marshal(users)
-		assert.Equal(t, string(expected)+"\n", rec.Body.String())
+
+		assert.Equal(t, string(expected)+"\n", "")
 	}
 }

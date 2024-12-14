@@ -1,9 +1,7 @@
 package internal
 
 import (
-	"fmt"
 	"log/slog"
-	"net"
 	"time"
 
 	"github.com/TheRoniOne/Kracker/middleware"
@@ -28,29 +26,4 @@ func StartServer(e *echo.Echo, address string) {
 			slog.Error("Server is down", "error", err)
 		}
 	}()
-}
-
-func StartTestServer(e *echo.Echo) string {
-	port, err := getUnusedPort()
-	if err != nil {
-		slog.Error("Failed to get unused port",
-			"error", err)
-		return ""
-	}
-
-	StartServer(e, fmt.Sprintf(":%d", port))
-
-	time.Sleep(1 * time.Second)
-
-	return fmt.Sprintf("http://localhost:%d", port)
-}
-
-func getUnusedPort() (int, error) {
-	listener, err := net.Listen("tcp", "localhost:0")
-	if err != nil {
-		return 0, err
-	}
-	defer listener.Close()
-
-	return listener.Addr().(*net.TCPAddr).Port, nil
 }
