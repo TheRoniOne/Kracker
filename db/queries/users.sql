@@ -1,5 +1,5 @@
 -- name: GetUser :one
-SELECT * FROM Users
+SELECT id, username, email, firstname, lastname, is_admin FROM Users
 WHERE id = $1 LIMIT 1;
 
 -- name: GetUserFromUsername :one
@@ -7,13 +7,13 @@ SELECT * FROM Users
 WHERE username = $1 LIMIT 1;
 
 -- name: ListUsers :many
-SELECT * FROM Users;
+SELECT id, username, email, firstname, lastname, is_admin FROM Users;
 
 -- name: CreateUser :one
 INSERT INTO Users (
-  username, email, salted_hash, firstname, lastname
+  username, email, salted_hash, firstname, lastname, is_admin
 ) VALUES (
-  $1, $2, $3, $4, $5
+  $1, $2, $3, $4, $5, $6
 )
 RETURNING *;
 

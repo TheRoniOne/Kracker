@@ -5,6 +5,7 @@ import (
 	"log/slog"
 	"os"
 	"path/filepath"
+	"runtime"
 	"strconv"
 	"strings"
 	"time"
@@ -22,7 +23,9 @@ var (
 
 	TimeLocation = getTimeLocation("America/Lima")
 
-	RateLimit = parseIntEnv("RATE_LIMIT")
+	RateLimit = parseIntEnv("RATE_LIMIT", 10)
+
+	RootPath = getRootPath()
 )
 
 func getSecret(key string) string {
@@ -40,11 +43,11 @@ func getSecret(key string) string {
 	return strings.TrimSpace(string(contents))
 }
 
-func parseIntEnv(key string) int {
+func parseIntEnv(key string, defaultValue int) int {
 	value := os.Getenv(key)
 
 	if value == "" {
-		return 0
+		return defaultValue
 	}
 
 	result, err := strconv.Atoi(value)
@@ -68,4 +71,10 @@ func getTimeLocation(key string) *time.Location {
 	}
 
 	return loc
+}
+
+func getRootPath() string {
+	_, b, _, _ := runtime.Caller(0)
+
+	return filepath.Join(filepath.Dir(b), "../")
 }

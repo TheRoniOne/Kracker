@@ -1,4 +1,4 @@
-package internal
+package utils
 
 import (
 	"context"
@@ -8,6 +8,7 @@ import (
 	"testing"
 	"time"
 
+	"github.com/TheRoniOne/Kracker/internal"
 	"github.com/stretchr/testify/require"
 	"github.com/testcontainers/testcontainers-go"
 	"github.com/testcontainers/testcontainers-go/modules/postgres"
@@ -24,7 +25,7 @@ const (
 
 func init() {
 	var err error
-	migrationsPath := filepath.Join(RootPath, "db/migrations/*.sql")
+	migrationsPath := filepath.Join(internal.RootPath, "db/migrations/*.sql")
 	Migrations, err = filepath.Glob(migrationsPath)
 	if err != nil {
 		fmt.Fprintf(os.Stderr, "Error while trying to find migrations: %v\n", err)
