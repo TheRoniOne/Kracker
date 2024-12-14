@@ -2,6 +2,7 @@ package internal
 
 import (
 	"fmt"
+	"log/slog"
 	"net"
 	"time"
 
@@ -11,7 +12,7 @@ import (
 	"golang.org/x/time/rate"
 )
 
-func StartServer(e *echo.Echo, address string) error {
+func StartServer(e *echo.Echo, address string) {
 	e.Debug = Debug
 	e.Use(middleware.RequestIDMiddleware())
 	e.Use(middleware.LoggingMiddleware())
@@ -21,16 +22,27 @@ func StartServer(e *echo.Echo, address string) error {
 		Timeout: 25 * time.Second,
 	}))
 
-	return e.Start(address)
+	go func() {
+		err := e.Start(address)
+		if err != nil {
+			slog.Error("Server is down", "error", err)
+		}
+	}()
 }
 
-func StartTestServer(e *echo.Echo) error {
+func StartTestServer(e *echo.Echo) string {
 	port, err := getUnusedPort()
 	if err != nil {
-		return err
+		slog.Error("Failed to get unused port",
+			"error", err)
+		return ""
 	}
 
-	return StartServer(e, fmt.Sprintf(":%d", port))
+	StartServer(e, fmt.Sprintf(":%d", port))
+
+	time.Sleep(1 * time.Second)
+
+	return fmt.Sprintf("http://localhost:%d", port)
 }
 
 func getUnusedPort() (int, error) {

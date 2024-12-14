@@ -11,8 +11,7 @@ import (
 )
 
 type UserHandler struct {
-	Queries   *sqlc.Queries
-	GetUserID func(c echo.Context) int64
+	Queries *sqlc.Queries
 }
 
 func (h *UserHandler) Create(c echo.Context) error {

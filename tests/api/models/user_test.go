@@ -1,4 +1,4 @@
-package models
+package tests
 
 import (
 	"context"
@@ -8,6 +8,8 @@ import (
 	"strings"
 	"testing"
 
+	"github.com/TheRoniOne/Kracker/api"
+	"github.com/TheRoniOne/Kracker/api/models"
 	"github.com/TheRoniOne/Kracker/db/factories"
 	"github.com/TheRoniOne/Kracker/db/sqlc"
 	"github.com/TheRoniOne/Kracker/internal"
@@ -28,6 +30,12 @@ func TestUserCreate(t *testing.T) {
 	e := echo.New()
 	queries := sqlc.New(dbPool)
 
+	serverURL := internal.StartTestServer(e)
+	require.NotEmpty(t, serverURL)
+	defer e.Close()
+
+	api.SetUpRoutes(e, queries)
+
 	userData := sqlc.CreateUserParams{
 		Username:   "test",
 		Email:      "test",
@@ -38,22 +46,14 @@ func TestUserCreate(t *testing.T) {
 
 	j, _ := json.Marshal(userData)
 
-	req := httptest.NewRequest(http.MethodPost, "/", strings.NewReader(string(j)))
-	req.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
-	rec := httptest.NewRecorder()
-	echoContext := e.NewContext(req, rec)
+	response, err := http.Post(serverURL+"/api/user/create", echo.MIMEApplicationJSON, strings.NewReader(string(j)))
+	require.NoError(t, err)
 
-	UserFactory := factories.UserFactory{Queries: queries}
-	user := UserFactory.CreateOne()
-
-	handler := UserHandler{Queries: queries, GetUserID: GetUserIDFromUser(&user)}
-	if assert.NoError(t, handler.Create(echoContext)) {
-		assert.Equal(t, http.StatusCreated, rec.Code)
-
+	if assert.Equal(t, http.StatusCreated, response.StatusCode) {
 		users, _ := queries.ListUsers(ctx)
-		assert.Len(t, users, 2)
+		assert.Len(t, users, 1)
 
-		user := users[1]
+		user := users[0]
 		assert.Equal(t, userData.Username, user.Username)
 		assert.Equal(t, userData.Email, user.Email)
 		assert.Equal(t, userData.Firstname, user.Firstname)
@@ -80,9 +80,9 @@ func TestUserList(t *testing.T) {
 	echoContext := e.NewContext(req, rec)
 
 	UserFactory := factories.UserFactory{Queries: queries}
-	user := UserFactory.CreateOne()
+	UserFactory.CreateOne()
 
-	handler := UserHandler{Queries: queries, GetUserID: GetUserIDFromUser(&user)}
+	handler := models.UserHandler{Queries: queries}
 	if assert.NoError(t, handler.List(echoContext)) {
 		assert.Equal(t, http.StatusOK, rec.Code)
 

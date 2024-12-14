@@ -9,7 +9,7 @@ import (
 func SetUpRoutes(app *echo.Echo, queries *sqlc.Queries) {
 	group := app.Group("/api")
 
-	userHandler := models.UserHandler{Queries: queries, GetUserID: models.GetUserID}
+	userHandler := models.UserHandler{Queries: queries}
 	group.POST("/user/create", userHandler.Create)
 	group.GET("/user/list", userHandler.List)
 }

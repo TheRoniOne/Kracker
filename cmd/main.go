@@ -42,10 +42,8 @@ func main() {
 	defer dbPool.Close()
 
 	e := echo.New()
-	err := internal.StartServer(e, ":1323")
+	internal.StartServer(e, ":1323")
 
 	queries := sqlc.New(dbPool)
 	api.SetUpRoutes(e, queries)
-
-	e.Logger.Fatal(err)
 }
