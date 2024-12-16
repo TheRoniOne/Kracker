@@ -10,3 +10,13 @@ CREATE TABLE "users" (
 );
 
 CREATE INDEX "idx_users_id" ON "users" ("id");
+
+CREATE TABLE "sessions" (
+    "id" uuid DEFAULT gen_random_uuid() NOT NULL,
+    "expires_at" TIMESTAMP WITH TIME ZONE NOT NULL,
+    "user_id" BIGINT NOT NULL,
+    PRIMARY KEY ("id")
+);
+
+CREATE INDEX "idx_sessions_id" ON "sessions" ("id");
+CREATE INDEX "idx_sessions_expires_at" ON "sessions" ("expires_at");

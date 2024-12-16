@@ -4,6 +4,16 @@
 
 package sqlc
 
+import (
+	"github.com/jackc/pgx/v5/pgtype"
+)
+
+type Session struct {
+	ID        pgtype.UUID        `json:"id"`
+	ExpiresAt pgtype.Timestamptz `json:"expires_at"`
+	UserID    int64              `json:"user_id"`
+}
+
 type User struct {
 	ID         int64  `json:"id"`
 	Username   string `json:"username"`

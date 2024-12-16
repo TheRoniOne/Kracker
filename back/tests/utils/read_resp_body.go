@@ -5,10 +5,10 @@ import (
 	"net/http"
 )
 
-func ReadRespBody(resp *http.Response) string {
+func ReadRespBody(resp *http.Response) []byte {
 	body, err := io.ReadAll(resp.Body)
 	if err != nil {
 		panic(err)
 	}
-	return string(body)
+	return body
 }
