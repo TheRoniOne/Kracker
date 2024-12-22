@@ -1,6 +1,6 @@
-FROM denoland/deno:alpine-2.1.4 AS base
+FROM denoland/deno:alpine-2.1.4 AS builder
 
-COPY . /app
+COPY ./front /app
 
 WORKDIR /app
 
@@ -8,8 +8,10 @@ RUN deno run build
 
 FROM denoland/deno:alpine-2.1.4 AS prod
 
-COPY --from=base /app/dist /app
+COPY --from=builder /app/dist /app
 
 WORKDIR /app
+
+EXPOSE 4321
 
 CMD ["deno", "--allow-env", "--allow-read", "--allow-net", "--allow-sys", "main.ts"]
