@@ -1,0 +1,13 @@
+{
+	"nodeModulesDir": "auto",
+	"imports": {
+		"crypto": "node:crypto",
+		"fs": "node:fs",
+		"stream": "node:stream",
+		"zlib": "node:zlib",
+		"events": "node:events",
+		"util": "node:util",
+		"path": "node:path",
+		"tty": "node:tty"
+	}
+}
