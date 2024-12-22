@@ -19,6 +19,11 @@ const fetcher = async (url: string | URL, options: RequestInit = {}) => {
 	});
 };
 
+export async function JSONFetcher(url: string, options: RequestInit = {}) {
+	const r = await fetcher(url, options);
+	return await r.json();
+}
+
 export type Params =
 	| Record<
 			string,

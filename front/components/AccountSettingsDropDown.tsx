@@ -1,3 +1,5 @@
+"use client";
+
 import { Button } from "@/components/ui/button";
 import {
 	DropdownMenu,
@@ -8,12 +10,15 @@ import {
 	DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import Link from "next/link";
+import useMe from "@/hooks/useMe";
 
 export function AccountSettingsDropdown() {
+	const { name } = useMe();
+
 	return (
 		<DropdownMenu>
 			<DropdownMenuTrigger asChild>
-				<Button variant="outline">Account</Button>
+				<Button variant="outline">{name}</Button>
 			</DropdownMenuTrigger>
 			<DropdownMenuContent className="w-56">
 				<DropdownMenuSeparator />
