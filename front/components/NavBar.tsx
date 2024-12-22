@@ -1,4 +1,4 @@
-import AccountSettingsDropdown from "@/components/accountSettingsDropDown";
+import AccountSettingsDropdown from "@/components/AccountSettingsDropDown";
 
 export default function NavBar() {
 	return (
