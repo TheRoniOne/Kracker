@@ -18,9 +18,9 @@ export function AccountSettingsDropdown() {
 	return (
 		<DropdownMenu>
 			<DropdownMenuTrigger asChild>
-				<Button variant="outline">{name}</Button>
+				<Button variant="outline">{name || "User"}</Button>
 			</DropdownMenuTrigger>
-			<DropdownMenuContent className="w-56">
+			<DropdownMenuContent className="w-auto p-2">
 				<DropdownMenuSeparator />
 				<DropdownMenuRadioGroup>
 					<DropdownMenuRadioItem value="settings">
