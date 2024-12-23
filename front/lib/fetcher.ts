@@ -2,11 +2,11 @@ import qs from "qs";
 
 const API_BASE = process.env.NEXT_PUBLIC_BACKEND;
 
-const buildURL = (endpoint: string): string => {
+function buildURL(endpoint: string): string {
 	return API_BASE + endpoint;
-};
+}
 
-const fetcher = async (url: string | URL, options: RequestInit = {}) => {
+export async function fetcher(url: string | URL, options: RequestInit = {}) {
 	return fetch(url, {
 		...options,
 	}).then((r) => {
@@ -17,28 +17,28 @@ const fetcher = async (url: string | URL, options: RequestInit = {}) => {
 
 		return r;
 	});
-};
+}
 
 export async function JSONFetcher(url: string, options: RequestInit = {}) {
 	const r = await fetcher(url, options);
 	return await r.json();
 }
 
-export type Params =
+type Params =
 	| Record<
 			string,
 			string | string[] | number | number[] | undefined | Date | boolean | null
 	  >
 	| undefined;
 
-const encodeURL = (url: string, queryParams: Params = undefined) => {
+function encodeURL(url: string, queryParams: Params = undefined) {
 	if (queryParams)
 		return `${url}?${qs.stringify(queryParams, { arrayFormat: "comma" })}`;
 
 	return url;
-};
+}
 
-const fe = {
+export const fe = {
 	get: async (url: string, queryParams: Params = undefined) => {
 		let newUrl = buildURL(url);
 		newUrl = encodeURL(newUrl, queryParams);
@@ -70,5 +70,3 @@ const fe = {
 		});
 	},
 };
-
-export { encodeURL, fe, fetcher, buildURL };
