@@ -44,7 +44,7 @@ export function LoginForm() {
 					name="username"
 					render={({ field }) => (
 						<FormItem>
-							<FormLabel className="font-bold">Username</FormLabel>
+							<FormLabel className="font-bold text-lg">Username</FormLabel>
 							<FormControl>
 								<Input {...field} />
 							</FormControl>
@@ -57,7 +57,7 @@ export function LoginForm() {
 					name="password"
 					render={({ field }) => (
 						<FormItem>
-							<FormLabel className="font-bold">Password</FormLabel>
+							<FormLabel className="font-bold text-lg">Password</FormLabel>
 							<FormControl>
 								<Input type="password" {...field} />
 							</FormControl>
@@ -65,7 +65,9 @@ export function LoginForm() {
 						</FormItem>
 					)}
 				/>
-				<Button type="submit">Submit</Button>
+				<Button type="submit" className="text-lg">
+					Submit
+				</Button>
 			</form>
 		</Form>
 	);
