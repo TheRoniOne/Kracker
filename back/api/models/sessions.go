@@ -1,7 +1,6 @@
 package models
 
 import (
-	"fmt"
 	"log/slog"
 	"net/http"
 	"time"
@@ -31,12 +30,14 @@ func (h *SessionHandler) Create(c echo.Context) error {
 
 	userData, err := h.Queries.GetUserFromUsername(c.Request().Context(), loginParams.Username)
 	if err != nil {
-		return err
+		slog.Error("Failed to get user from username",
+			"error", err)
+		return echo.ErrBadRequest
 	}
 
 	isOk, err := argon2id.ComparePasswordAndHash(loginParams.Password, userData.SaltedHash)
 	if err != nil {
-		return err
+		return echo.ErrInternalServerError
 	}
 
 	if !isOk {
@@ -48,7 +49,9 @@ func (h *SessionHandler) Create(c echo.Context) error {
 	now := time.Now().AddDate(0, 0, internal.SessionMaxAgeDays).In(internal.TimeLocation)
 	err = tStamp.Scan(now)
 	if err != nil {
-		slog.Error(fmt.Sprintf("Failed to scan time: %v", err))
+		slog.Error("Failed to scan time",
+			"error", err)
+		return echo.ErrInternalServerError
 	}
 
 	session, err := h.Queries.CreateSession(c.Request().Context(), sqlc.CreateSessionParams{
@@ -56,7 +59,9 @@ func (h *SessionHandler) Create(c echo.Context) error {
 		UserID:    userData.ID,
 	})
 	if err != nil {
-		return err
+		slog.Error("Failed to create session",
+			"error", err)
+		return echo.ErrInternalServerError
 	}
 
 	sessID := session.ID.String()

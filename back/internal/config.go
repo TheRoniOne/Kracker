@@ -27,6 +27,8 @@ var (
 
 	RootPath          = getRootPath()
 	SessionMaxAgeDays = parseIntEnv("SESSION_MAX_AGE_DAYS", 30)
+
+	DOMAIN = os.Getenv("DOMAIN")
 )
 
 func getSecret(key string) string {

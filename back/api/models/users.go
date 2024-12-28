@@ -44,6 +44,8 @@ func (h *UserHandler) Create(c echo.Context) error {
 		Lastname:   user.Lastname,
 	})
 	if err != nil {
+		slog.Error("Failed to create user",
+			"error", err)
 		return err
 	}
 

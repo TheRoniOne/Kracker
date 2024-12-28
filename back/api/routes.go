@@ -1,6 +1,8 @@
 package api
 
 import (
+	"net/http"
+
 	"github.com/TheRoniOne/Kracker/api/models"
 	"github.com/TheRoniOne/Kracker/db/sqlc"
 	"github.com/TheRoniOne/Kracker/middleware"
@@ -8,6 +10,10 @@ import (
 )
 
 func SetUpRoutes(app *echo.Echo, queries *sqlc.Queries) {
+	app.GET("/", func(c echo.Context) error {
+		return c.NoContent(http.StatusOK)
+	})
+
 	group := app.Group("/api")
 
 	sessionMiddleware := middleware.SessionMiddleware{Queries: queries}
