@@ -87,7 +87,7 @@ func TestUserList(t *testing.T) {
 	UserBuilder.CreateOne()
 
 	apiClient := utils.NewLoggedInClient(serverURL, "test", "test")
-	response, err := apiClient.Client.Get(serverURL + "/api/user/list")
+	response, err := apiClient.Get("/api/user/list")
 	require.NoError(t, err)
 
 	if assert.Equal(t, http.StatusOK, response.StatusCode) {
