@@ -46,8 +46,8 @@ func (h *SessionHandler) Create(c echo.Context) error {
 
 	tStamp := pgtype.Timestamptz{}
 
-	now := time.Now().AddDate(0, 0, internal.SessionMaxAgeDays).In(internal.TimeLocation)
-	err = tStamp.Scan(now)
+	expirationDate := time.Now().AddDate(0, 0, internal.SessionMaxAgeDays).In(internal.TimeLocation)
+	err = tStamp.Scan(expirationDate)
 	if err != nil {
 		slog.Error("Failed to scan time",
 			"error", err)
@@ -55,7 +55,7 @@ func (h *SessionHandler) Create(c echo.Context) error {
 	}
 
 	session, err := h.Queries.CreateSession(c.Request().Context(), sqlc.CreateSessionParams{
-		ExpiresAt: pgtype.Timestamptz{},
+		ExpiresAt: tStamp,
 		UserID:    userData.ID,
 	})
 	if err != nil {

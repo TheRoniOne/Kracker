@@ -2,7 +2,6 @@ package internal
 
 import (
 	"log/slog"
-	"net/http"
 	"time"
 
 	"github.com/TheRoniOne/Kracker/middleware"
@@ -14,14 +13,14 @@ import (
 func StartServer(e *echo.Echo, address string, exit chan bool) {
 	e.Debug = Debug
 
-	e.Use(echomiddleware.CSRFWithConfig(echomiddleware.CSRFConfig{
-		TokenLookup:    "cookie:_csrf",
-		CookiePath:     "/",
-		CookieDomain:   DOMAIN,
-		CookieSecure:   true,
-		CookieHTTPOnly: true,
-		CookieSameSite: http.SameSiteStrictMode,
-	}))
+	// e.Use(echomiddleware.CSRFWithConfig(echomiddleware.CSRFConfig{
+	// 	TokenLookup:    "cookie:_csrf",
+	// 	CookiePath:     "/",
+	// 	CookieDomain:   DOMAIN,
+	// 	CookieSecure:   true,
+	// 	CookieHTTPOnly: true,
+	// 	CookieSameSite: http.SameSiteStrictMode,
+	// }))
 	e.Use(echomiddleware.Recover())
 	e.Use(echomiddleware.RateLimiter(echomiddleware.NewRateLimiterMemoryStore(rate.Limit(RateLimit))))
 	e.Use(echomiddleware.TimeoutWithConfig(echomiddleware.TimeoutConfig{
