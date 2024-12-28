@@ -71,9 +71,24 @@ func (h *SessionHandler) Create(c echo.Context) error {
 }
 
 func (h *SessionHandler) Delete(c echo.Context) error {
-	err := h.Queries.DeleteSession(c.Request().Context(), GetSessionID(c))
+	s, err := c.Cookie("SESSION")
 	if err != nil {
-		slog.Error(fmt.Sprintf("Failed to delete session: %v", err))
+		slog.Error("Failed to get session ID from cookies")
+		return echo.ErrBadRequest
+	}
+
+	sessionID := pgtype.UUID{}
+	err = sessionID.Scan(s.Value)
+	if err != nil {
+		slog.Error("Failed to scan session ID",
+			"error", err)
+		return echo.ErrInternalServerError
+	}
+
+	err = h.Queries.DeleteSession(c.Request().Context(), sessionID)
+	if err != nil {
+		slog.Error("Failed to delete session",
+			"error", err)
 		return echo.ErrInternalServerError
 	}
 

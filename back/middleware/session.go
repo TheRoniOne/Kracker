@@ -34,7 +34,6 @@ func (s *SessionMiddleware) Handle(next echo.HandlerFunc) echo.HandlerFunc {
 			return echo.ErrUnauthorized
 		}
 
-		c.Set("SessionID", session)
 		c.Set("UserID", session.UserID)
 
 		return next(c)
