@@ -3,11 +3,15 @@ package api
 import (
 	"github.com/TheRoniOne/Kracker/api/models"
 	"github.com/TheRoniOne/Kracker/db/sqlc"
+	"github.com/TheRoniOne/Kracker/middleware"
 	"github.com/labstack/echo/v4"
 )
 
 func SetUpRoutes(app *echo.Echo, queries *sqlc.Queries) {
 	group := app.Group("/api")
+
+	sessionMiddleware := middleware.SessionMiddleware{Queries: queries}
+	protected := group.Group("", sessionMiddleware.Handle)
 
 	sessionHandler := models.SessionHandler{Queries: queries}
 	group.POST("/session", sessionHandler.Create)
@@ -15,5 +19,5 @@ func SetUpRoutes(app *echo.Echo, queries *sqlc.Queries) {
 
 	userHandler := models.UserHandler{Queries: queries}
 	group.POST("/user/create", userHandler.Create)
-	group.GET("/user/list", userHandler.List)
+	protected.GET("/user/list", userHandler.List)
 }

@@ -17,5 +17,4 @@ func GetUserIDFromUser(u *sqlc.User) func(echo.Context) int64 {
 }
 
 func GetSessionID(c echo.Context) pgtype.UUID {
-	return c.Get("sessionID").(pgtype.UUID)
 }

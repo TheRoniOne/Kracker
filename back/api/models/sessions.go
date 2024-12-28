@@ -59,13 +59,15 @@ func (h *SessionHandler) Create(c echo.Context) error {
 		return err
 	}
 
-	sessID, err := session.ID.MarshalJSON()
-	if err != nil {
-		slog.Error(fmt.Sprintf("Failed to get session ID: %v", err))
-		return echo.ErrInternalServerError
-	}
+	sessID := session.ID.String()
 
-	return c.JSON(http.StatusOK, sessID)
+	cookie := new(http.Cookie)
+	cookie.Name = "SESSION"
+	cookie.Value = sessID
+	cookie.Expires = time.Now().Add(time.Duration(internal.SessionMaxAgeDays) * time.Hour * 24)
+	c.SetCookie(cookie)
+
+	return c.String(http.StatusOK, "Logged in successfully")
 }
 
 func (h *SessionHandler) Delete(c echo.Context) error {
