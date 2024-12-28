@@ -11,7 +11,7 @@ import (
 
 	"github.com/TheRoniOne/Kracker/api"
 	"github.com/TheRoniOne/Kracker/api/models"
-	"github.com/TheRoniOne/Kracker/db/factories"
+	"github.com/TheRoniOne/Kracker/db/builders"
 	"github.com/TheRoniOne/Kracker/db/sqlc"
 	"github.com/TheRoniOne/Kracker/tests/utils"
 	"github.com/alexedwards/argon2id"
@@ -83,10 +83,11 @@ func TestUserList(t *testing.T) {
 
 	api.SetUpRoutes(e, queries)
 
-	UserFactory := factories.UserFactory{Queries: queries}
-	UserFactory.CreateOne()
+	UserBuilder := builders.NewUserBuilder(queries).Username("test").Password("test")
+	UserBuilder.CreateOne()
 
-	response, err := http.Get(serverURL + "/api/user/list")
+	apiClient := utils.NewLoggedInClient(serverURL, "test", "test")
+	response, err := apiClient.Client.Get(serverURL + "/api/user/list")
 	require.NoError(t, err)
 
 	if assert.Equal(t, http.StatusOK, response.StatusCode) {
