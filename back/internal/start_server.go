@@ -17,7 +17,7 @@ func StartServer(e *echo.Echo, address string, exit chan bool) {
 	e.Use(echomiddleware.CSRFWithConfig(echomiddleware.CSRFConfig{
 		TokenLookup:    "cookie:_csrf",
 		CookiePath:     "/",
-		CookieDomain:   "",
+		CookieDomain:   DOMAIN,
 		CookieSecure:   CSRFCookieSecure,
 		CookieHTTPOnly: true,
 		CookieSameSite: http.SameSiteStrictMode,
