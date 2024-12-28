@@ -6,12 +6,11 @@ import (
 	"encoding/json"
 	"fmt"
 	"net/http"
-	"strings"
 	"testing"
 
 	"github.com/TheRoniOne/Kracker/api"
 	"github.com/TheRoniOne/Kracker/api/models"
-	"github.com/TheRoniOne/Kracker/db/factories"
+	"github.com/TheRoniOne/Kracker/db/builders"
 	"github.com/TheRoniOne/Kracker/db/sqlc"
 	"github.com/TheRoniOne/Kracker/tests/utils"
 	"github.com/alexedwards/argon2id"
@@ -45,9 +44,10 @@ func TestUserCreate(t *testing.T) {
 		Lastname:  "test",
 	}
 
-	j, _ := json.Marshal(userData)
+	body, _ := json.Marshal(userData)
 
-	response, err := http.Post(serverURL+"/api/user/create", echo.MIMEApplicationJSON, strings.NewReader(string(j)))
+	apiClient := utils.NewAPIClient(serverURL)
+	response, err := apiClient.Post("/api/user/create", echo.MIMEApplicationJSON, body)
 	require.NoError(t, err)
 
 	if assert.Equal(t, http.StatusCreated, response.StatusCode) {
@@ -83,10 +83,11 @@ func TestUserList(t *testing.T) {
 
 	api.SetUpRoutes(e, queries)
 
-	UserFactory := factories.UserFactory{Queries: queries}
-	UserFactory.CreateOne()
+	UserBuilder := builders.NewUserBuilder(queries).Username("test").Password("test")
+	UserBuilder.CreateOne()
 
-	response, err := http.Get(serverURL + "/api/user/list")
+	apiClient := utils.NewLoggedInAPIClient(serverURL, "test", "test")
+	response, err := apiClient.Get("/api/user/list")
 	require.NoError(t, err)
 
 	if assert.Equal(t, http.StatusOK, response.StatusCode) {

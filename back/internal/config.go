@@ -19,7 +19,7 @@ var (
 	DBUser     = os.Getenv("DB_USER")
 	DBPassword = getSecret("DB_PASSWORD")
 
-	Debug = os.Getenv("DEBUG") == "true"
+	Debug = parseBoolEnv("DEBUG", false)
 
 	TimeLocation = getTimeLocation("TIME_LOCATION")
 
@@ -27,6 +27,9 @@ var (
 
 	RootPath          = getRootPath()
 	SessionMaxAgeDays = parseIntEnv("SESSION_MAX_AGE_DAYS", 30)
+
+	DOMAIN           = os.Getenv("DOMAIN")
+	CSRFCookieSecure = parseBoolEnv("CSRF_COOKIE_SECURE", false)
 )
 
 func getSecret(key string) string {
@@ -52,6 +55,23 @@ func parseIntEnv(key string, defaultValue int) int {
 	}
 
 	result, err := strconv.Atoi(value)
+	if err != nil {
+		slog.Error(fmt.Sprintf("Failed to parse %s", key),
+			"error", err)
+		panic(err)
+	}
+
+	return result
+}
+
+func parseBoolEnv(key string, defaultValue bool) bool {
+	value := os.Getenv(key)
+
+	if value == "" {
+		return defaultValue
+	}
+
+	result, err := strconv.ParseBool(value)
 	if err != nil {
 		slog.Error(fmt.Sprintf("Failed to parse %s", key),
 			"error", err)

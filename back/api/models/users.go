@@ -1,12 +1,11 @@
 package models
 
 import (
-	"fmt"
 	"log/slog"
 	"net/http"
 
 	"github.com/TheRoniOne/Kracker/db/sqlc"
-	"github.com/alexedwards/argon2id"
+	"github.com/TheRoniOne/Kracker/internal"
 	"github.com/labstack/echo/v4"
 )
 
@@ -30,18 +29,11 @@ func (h *UserHandler) Create(c echo.Context) error {
 		return echo.ErrBadRequest
 	}
 
-	params := &argon2id.Params{
-		Memory:      64 * 1024,
-		Iterations:  3,
-		Parallelism: 2,
-		SaltLength:  16,
-		KeyLength:   32,
-	}
-
-	saltedHash, err := argon2id.CreateHash(user.Password, params)
+	saltedHash, err := internal.CreateSaltedHash(user.Password)
 	if err != nil {
-		slog.Error(fmt.Sprintf("Failed to hash password: %v", err))
-		return err
+		slog.Error("Failed to hash password",
+			"error", err)
+		return echo.ErrInternalServerError
 	}
 
 	_, err = h.Queries.CreateUser(c.Request().Context(), sqlc.CreateUserParams{
@@ -52,6 +44,8 @@ func (h *UserHandler) Create(c echo.Context) error {
 		Lastname:   user.Lastname,
 	})
 	if err != nil {
+		slog.Error("Failed to create user",
+			"error", err)
 		return err
 	}
 

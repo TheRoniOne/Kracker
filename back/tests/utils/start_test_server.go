@@ -18,7 +18,7 @@ func StartTestServer(e *echo.Echo) string {
 		return ""
 	}
 
-	internal.StartServer(e, fmt.Sprintf(":%d", port))
+	internal.StartServer(e, fmt.Sprintf(":%d", port), make(chan bool))
 
 	time.Sleep(1 * time.Second)
 

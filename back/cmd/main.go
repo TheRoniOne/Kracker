@@ -41,9 +41,13 @@ func init() {
 func main() {
 	defer dbPool.Close()
 
+	exitChannel := make(chan bool)
+
 	e := echo.New()
-	internal.StartServer(e, ":1323")
+	internal.StartServer(e, ":1323", exitChannel)
 
 	queries := sqlc.New(dbPool)
 	api.SetUpRoutes(e, queries)
+
+	<-exitChannel
 }

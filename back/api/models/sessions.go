@@ -1,7 +1,6 @@
 package models
 
 import (
-	"fmt"
 	"log/slog"
 	"net/http"
 	"time"
@@ -31,12 +30,14 @@ func (h *SessionHandler) Create(c echo.Context) error {
 
 	userData, err := h.Queries.GetUserFromUsername(c.Request().Context(), loginParams.Username)
 	if err != nil {
-		return err
+		slog.Error("Failed to get user from username",
+			"error", err)
+		return echo.ErrBadRequest
 	}
 
 	isOk, err := argon2id.ComparePasswordAndHash(loginParams.Password, userData.SaltedHash)
 	if err != nil {
-		return err
+		return echo.ErrInternalServerError
 	}
 
 	if !isOk {
@@ -45,33 +46,54 @@ func (h *SessionHandler) Create(c echo.Context) error {
 
 	tStamp := pgtype.Timestamptz{}
 
-	now := time.Now().AddDate(0, 0, internal.SessionMaxAgeDays).In(internal.TimeLocation)
-	err = tStamp.Scan(now)
+	expirationDate := time.Now().AddDate(0, 0, internal.SessionMaxAgeDays).In(internal.TimeLocation)
+	err = tStamp.Scan(expirationDate)
 	if err != nil {
-		slog.Error(fmt.Sprintf("Failed to scan time: %v", err))
-	}
-
-	session, err := h.Queries.CreateSession(c.Request().Context(), sqlc.CreateSessionParams{
-		ExpiresAt: pgtype.Timestamptz{},
-		UserID:    userData.ID,
-	})
-	if err != nil {
-		return err
-	}
-
-	sessID, err := session.ID.MarshalJSON()
-	if err != nil {
-		slog.Error(fmt.Sprintf("Failed to get session ID: %v", err))
+		slog.Error("Failed to scan time",
+			"error", err)
 		return echo.ErrInternalServerError
 	}
 
-	return c.JSON(http.StatusOK, sessID)
+	session, err := h.Queries.CreateSession(c.Request().Context(), sqlc.CreateSessionParams{
+		ExpiresAt: tStamp,
+		UserID:    userData.ID,
+	})
+	if err != nil {
+		slog.Error("Failed to create session",
+			"error", err)
+		return echo.ErrInternalServerError
+	}
+
+	sessID := session.ID.String()
+
+	cookie := new(http.Cookie)
+	cookie.Name = "SESSION"
+	cookie.Value = sessID
+	cookie.Expires = time.Now().Add(time.Duration(internal.SessionMaxAgeDays) * time.Hour * 24)
+	c.SetCookie(cookie)
+
+	return c.String(http.StatusOK, "Logged in successfully")
 }
 
 func (h *SessionHandler) Delete(c echo.Context) error {
-	err := h.Queries.DeleteSession(c.Request().Context(), GetSessionID(c))
+	s, err := c.Cookie("SESSION")
 	if err != nil {
-		slog.Error(fmt.Sprintf("Failed to delete session: %v", err))
+		slog.Error("Failed to get session ID from cookies")
+		return echo.ErrBadRequest
+	}
+
+	sessionID := pgtype.UUID{}
+	err = sessionID.Scan(s.Value)
+	if err != nil {
+		slog.Error("Failed to scan session ID",
+			"error", err)
+		return echo.ErrInternalServerError
+	}
+
+	err = h.Queries.DeleteSession(c.Request().Context(), sessionID)
+	if err != nil {
+		slog.Error("Failed to delete session",
+			"error", err)
 		return echo.ErrInternalServerError
 	}
 
