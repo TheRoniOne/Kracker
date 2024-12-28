@@ -4,11 +4,11 @@ import (
 	"context"
 	"encoding/json"
 	"net/http"
-	"strings"
 	"testing"
 
 	"github.com/TheRoniOne/Kracker/api"
 	"github.com/TheRoniOne/Kracker/api/models"
+	"github.com/TheRoniOne/Kracker/db/builders"
 	"github.com/TheRoniOne/Kracker/db/sqlc"
 	"github.com/TheRoniOne/Kracker/tests/utils"
 	"github.com/jackc/pgx/v5/pgtype"
@@ -34,27 +34,19 @@ func TestSessionCreate(t *testing.T) {
 
 	api.SetUpRoutes(e, queries)
 
-	userData := models.UserCreateParams{
-		Username:  "test",
-		Email:     "test",
-		Password:  "test",
-		Firstname: "test",
-		Lastname:  "test",
-	}
-
-	j, _ := json.Marshal(userData)
-
-	_, err = http.Post(serverURL+"/api/user/create", echo.MIMEApplicationJSON, strings.NewReader(string(j)))
-	require.NoError(t, err)
+	UserBuilder := builders.NewUserBuilder(queries).Username("test").Password("test")
+	UserBuilder.CreateOne()
 
 	createSessionParams := models.SessionCreateParams{
-		Username: userData.Username,
-		Password: userData.Password,
+		Username: "test",
+		Password: "test",
 	}
 
-	j, _ = json.Marshal(createSessionParams)
+	body, err := json.Marshal(createSessionParams)
+	require.NoError(t, err)
 
-	response, err := http.Post(serverURL+"/api/session", echo.MIMEApplicationJSON, strings.NewReader(string(j)))
+	apiClient := utils.NewLoggedInAPIClient(serverURL, "test", "test")
+	response, err := apiClient.Post("/api/session", echo.MIMEApplicationJSON, body)
 	require.NoError(t, err)
 
 	if assert.Equal(t, http.StatusOK, response.StatusCode) {
