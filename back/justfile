@@ -1,7 +1,7 @@
 set dotenv-filename := ".env.local"
 
 build:
-    docker compose -f compose.local.yaml up --build
+    docker build --pull -t kracker-back:local -f ../deploy/back/Dockerfile ../ && docker compose -f compose.local.yaml up --build
 
 tidy:
     go mod tidy

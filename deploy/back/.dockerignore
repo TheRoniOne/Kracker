@@ -1,5 +1,5 @@
-justfile
+back/justfile
 LICENSE
 README.md
-compose.*
+back/compose.*
 Dockerfile
