@@ -6,7 +6,6 @@ import (
 	"encoding/json"
 	"fmt"
 	"net/http"
-	"strings"
 	"testing"
 
 	"github.com/TheRoniOne/Kracker/api"
@@ -45,9 +44,10 @@ func TestUserCreate(t *testing.T) {
 		Lastname:  "test",
 	}
 
-	j, _ := json.Marshal(userData)
+	body, _ := json.Marshal(userData)
 
-	response, err := http.Post(serverURL+"/api/user/create", echo.MIMEApplicationJSON, strings.NewReader(string(j)))
+	apiClient := utils.NewAPIClient(serverURL)
+	response, err := apiClient.Post("/api/user/create", echo.MIMEApplicationJSON, body)
 	require.NoError(t, err)
 
 	if assert.Equal(t, http.StatusCreated, response.StatusCode) {
@@ -86,7 +86,7 @@ func TestUserList(t *testing.T) {
 	UserBuilder := builders.NewUserBuilder(queries).Username("test").Password("test")
 	UserBuilder.CreateOne()
 
-	apiClient := utils.NewLoggedInClient(serverURL, "test", "test")
+	apiClient := utils.NewLoggedInAPIClient(serverURL, "test", "test")
 	response, err := apiClient.Get("/api/user/list")
 	require.NoError(t, err)
 

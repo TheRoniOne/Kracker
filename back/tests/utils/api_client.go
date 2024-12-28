@@ -16,7 +16,7 @@ type APIClient struct {
 	BaseURL string
 }
 
-func NewClient(baseURL string) *APIClient {
+func NewAPIClient(baseURL string) *APIClient {
 	jar, err := cookiejar.New(nil)
 	if err != nil {
 		panic(err)
@@ -41,8 +41,8 @@ func NewClient(baseURL string) *APIClient {
 	}
 }
 
-func NewLoggedInClient(baseURL, username, password string) *APIClient {
-	client := NewClient(baseURL)
+func NewLoggedInAPIClient(baseURL, username, password string) *APIClient {
+	client := NewAPIClient(baseURL)
 
 	createSessionParams := models.SessionCreateParams{
 		Username: username,
@@ -72,4 +72,8 @@ func (c *APIClient) MakeURL(path string) string {
 
 func (c *APIClient) Get(path string) (*http.Response, error) {
 	return c.Client.Get(c.MakeURL(path))
+}
+
+func (c *APIClient) Post(path string, contentType string, body []byte) (*http.Response, error) {
+	return c.Client.Post(c.MakeURL(path), contentType, strings.NewReader(string(body)))
 }
