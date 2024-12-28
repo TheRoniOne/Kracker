@@ -10,7 +10,7 @@ import (
 	"golang.org/x/time/rate"
 )
 
-func StartServer(e *echo.Echo, address string) {
+func StartServer(e *echo.Echo, address string, exit chan bool) {
 	e.Debug = Debug
 
 	e.Use(echomiddleware.CSRF())
@@ -25,7 +25,10 @@ func StartServer(e *echo.Echo, address string) {
 	go func() {
 		err := e.Start(address)
 		if err != nil {
-			slog.Error("Server is down", "error", err)
+			slog.Info("Server is down",
+				"error", err)
 		}
+
+		exit <- true
 	}()
 }
