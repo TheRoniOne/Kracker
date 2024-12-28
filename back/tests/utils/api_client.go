@@ -2,6 +2,7 @@ package utils
 
 import (
 	"encoding/json"
+	"log/slog"
 	"net/http"
 	"net/http/cookiejar"
 	"strings"
@@ -56,6 +57,9 @@ func NewLoggedInClient(baseURL, username, password string) *APIClient {
 	}
 
 	if resp.StatusCode != http.StatusOK {
+		slog.Error("Failed to create session",
+			"status", resp.Status,
+			"body", ReadRespBody(resp))
 		panic("Failed to log in")
 	}
 
