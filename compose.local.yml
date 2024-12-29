@@ -35,7 +35,8 @@ services:
       - "traefik.enable=true"
       - "traefik.http.routers.backend.entrypoints=web"
       - "traefik.http.routers.backend.rule=Host(`${DOMAIN}`) && PathPrefix(`/back`)"
-      - "traefik.http.routers.backend.middlewares=security-headers@file, backend-stripprefix@file"
+      - "traefik.http.middlewares.dynamic-headers.headers.accesscontrolalloworiginlist=http://${DOMAIN}"
+      - "traefik.http.routers.backend.middlewares=security-headers@file, backend-stripprefix@file, dynamic-headers"
       - "traefik.http.routers.backend.service=backend-service"
       - "traefik.http.services.backend-service.loadbalancer.server.port=1323"
 
@@ -53,7 +54,7 @@ services:
       - "traefik.enable=true"
       - "traefik.http.routers.frontend.entrypoints=web"
       - "traefik.http.routers.frontend.rule=Host(`${DOMAIN}`) && (!PathPrefix(`/back`))"
-      - "traefik.http.routers.frontend.middlewares=security-headers@file"
+      - "traefik.http.routers.frontend.middlewares=security-headers@file, dynamic-headers"
       - "traefik.http.routers.frontend.service=frontend-service"
       - "traefik.http.services.frontend-service.loadbalancer.server.port=3000"
 

@@ -19,7 +19,6 @@ http:
         # Access-Control Headers
         accesscontrolallowmethods: "GET,POST,PATCH,DELETE"
         accesscontrolallowheaders: "Content-Type"
-        accesscontrolalloworiginlist: "http://localhost"
         accesscontrolmaxage: "100"
         addvaryheader: "true"
         customResponseHeaders:
