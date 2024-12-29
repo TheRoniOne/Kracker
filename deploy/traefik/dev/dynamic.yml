@@ -1,7 +1,71 @@
 http:
+  services:
+    backend:
+      loadbalancer:
+        servers:
+          - address: backend:8080
+    frontend:
+      loadbalancer:
+        servers:
+          - address: frontend:3000
+
   routers:
     self:
-      rule: PathPrefix(`/`)
-      service: api@internal
       entryPoints:
         - web-traefik
+      rule: PathPrefix(`/`)
+      service: api@internal
+
+    backend:
+      entryPoints:
+        - web
+      rule: Host(`${DOMAIN}`) && PathPrefix(`/back`)
+      middlewares:
+        - security-headers
+        - backend-stripprefix
+      service: backend
+
+    frontend:
+      entryPoints:
+        - web
+      rule: Host(`${DOMAIN}`) && (!PathPrefix(`/back`))
+      middlewares:
+        - security-headers
+      service: frontend
+
+  middlewares:
+    security-headers:
+      headers:
+        # Security Headers
+        framedeny: "true"
+        browserxssfilter: "true"
+        # X-Content-Type-Options
+        contentTypeNosniff: "true"
+        # Referrer-Policy
+        referrerPolicy: "strict-origin-when-cross-origin"
+        # Access-Control Headers
+        accesscontrolallowmethods: "GET,POST,PATCH,DELETE"
+        accesscontrolallowheaders: "Content-Type"
+        accesscontrolalloworiginlist: "http://localhost"
+        accesscontrolmaxage: "100"
+        addvaryheader: "true"
+        # CORS Headers
+        customResponseHeaders:
+          Cross-Origin-Opener-Policy: "same-origin"
+          Cross-Origin-Embedder-Policy: "require-corp"
+          Cross-Origin-Resource-Policy: "same-site"
+        # Permissions-Policy
+        permissionsPolicy: "geolocation=(), camera=(), microphone=(), interest-cohort=()"
+        # Custom Headers Hardening
+        customResponseHeaders:
+          expect-ct: ""
+          server: ""
+          x-powered-by: ""
+          x-dns-prefetch-control: "off"
+          public-key-pins: ""
+        # Content-Security-Policy
+        contentSecurityPolicy: "default-src 'none'; script-src 'self'; connect-src 'self'; img-src 'self'; style-src 'self'; frame-ancestors 'self'; form-action 'self';"
+
+    backend-stripprefix:
+      stripPrefix:
+        prefixes: /back
