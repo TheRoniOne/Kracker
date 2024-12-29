@@ -67,7 +67,7 @@ services:
       - "traefik.http.middlewares.auth.basicauth.usersfile=/run/secrets/traefik_users"
 
   backend:
-    image: kracker-backend:${KRACKER_VERSION}
+    image: ghcr.io/theronione/kracker-backend:${KRACKER_VERSION}
     env_file:
       - /usr/kracker/.env.backend
     logging:
@@ -92,7 +92,7 @@ services:
       - "traefik.http.routers.kracker-backend.middlewares=kracker-security-headers@file, kracker-backend-strip-prefix@file, kracker-dynamic-headers"
 
   frontend:
-    image: kracker-frontend:${KRACKER_VERSION}
+    image: ghcr.io/theronione/kracker-frontend:${KRACKER_VERSION}
     env_file:
       - /usr/kracker/.env.frontend
     logging:
