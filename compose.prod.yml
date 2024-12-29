@@ -22,7 +22,7 @@ services:
     secrets:
       - traefik_users
     command:
-      - "--log.level=DEBUG"
+      - "--log.level=INFO"
       - "--log.format=json"
       - "--accesslog=true"
       - "--accesslog.format=json"
