@@ -1,7 +1,4 @@
-# This workflow will build a golang project
-# For more information see: https://docs.github.com/en/actions/automating-builds-and-tests/building-and-testing-go
-
-name: Go
+name: CI
 
 on:
   push:
@@ -22,31 +19,26 @@ jobs:
     - uses: actions/checkout@v4
 
     - name: Set up Go
-      uses: actions/setup-go@v4
+      uses: actions/setup-go@v5
       with:
         go-version: '1.23'
+        cache-dependency-path: back/go.sum
 
     - name: Install dependencies
-        run: |
-          cd back
-          go mod tidy 
+      run: |
+        cd back
+        go mod tidy 
 
     - name: Run Go tests
-        run: |
-          cd back
-          go run gotest.tools/gotestsum@latest --junitfile junit.xml -- -v -coverpkg=./... -coverprofile=profile.cov ./...
-          go tool cover -func profile.cov
-
-    - name: Upload test results and coverage report
-        uses: actions/upload-artifact@v4
-        with:
-          name: go-test-artifacts
-          path: |
-            back/junit.xml
-            back/profile.cov
-
-    - name: Upload coverage report
-        uses: codecov/codecov-action@v4
-        with:
-          file: back/profile.cov
-          flags: unittests
+      run: |
+        cd back
+        go run gotest.tools/gotestsum@latest --junitfile junit.xml -- -v -coverpkg=./... -coverprofile=profile.cov ./...
+        go tool cover -func profile.cov
+          
+    - name: Upload Go test results
+      uses: actions/upload-artifact@v4
+      with:
+        name: go-test-artifacts
+        path: |
+          back/junit.xml
+          back/profile.cov
