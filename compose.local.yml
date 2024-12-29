@@ -36,7 +36,7 @@ services:
       - "traefik.http.routers.backend.entrypoints=web"
       - "traefik.http.routers.backend.rule=Host(`${DOMAIN}`) && PathPrefix(`/back`)"
       - "traefik.http.middlewares.dynamic-headers.headers.accesscontrolalloworiginlist=http://${DOMAIN}"
-      - "traefik.http.routers.backend.middlewares=security-headers@file, backend-stripprefix@file, dynamic-headers"
+      - "traefik.http.routers.backend.middlewares=security-headers@file, backend-strip-prefix@file, dynamic-headers"
       - "traefik.http.routers.backend.service=backend-service"
       - "traefik.http.services.backend-service.loadbalancer.server.port=1323"
 

@@ -44,7 +44,7 @@ services:
       - "traefik.enable=true"
       - "traefik.http.routers.dashboard.entrypoints=web-traefik"
       - "traefik.http.routers.dashboard.service=api@internal"
-      - "traefik.http.routers.dashboard.rule=Host(`${SUBDOMAIN}.traefik.${DOMAIN}`) && PathPrefix(`/`)"
+      - "traefik.http.routers.dashboard.rule=Host(`kracker.traefik.${DOMAIN}`) && PathPrefix(`/`)"
       - "traefik.http.routers.dashboard.tls=true"
       - "traefik.http.routers.dashboard.middlewares=auth"
       - "traefik.http.middlewares.auth.basicauth.usersfile=/run/secrets/traefik_users"
@@ -61,16 +61,18 @@ services:
       - kracker
     labels:
       - "traefik.enable=true"
+
+      - "traefik.http.services.kracker-backend-service.loadbalancer.server.port=1323"
+
       - "traefik.http.routers.kracker-backend.entrypoints=web, web-secured"
       - "traefik.http.routers.kracker-backend.tls=true"
-      - "traefik.http.routers.kracker-backend.rule=Host(`${SUBDOMAIN}.${DOMAIN}`) && PathPrefix(`/back`)"
-      - "traefik.http.routers.kracker-backend.service=backend-service"
-      - "traefik.http.services.kracker-backend-service.loadbalancer.server.port=1323"
+      - "traefik.http.routers.kracker-backend.rule=Host(`kracker.${DOMAIN}`) && PathPrefix(`/back`)"
+      - "traefik.http.routers.kracker-backend.service=kracker-backend-service"
 
       - "traefik.http.middlewares.kracker-dynamic-headers.headers.accesscontrolalloworiginlist=http://${DOMAIN}"
       - "traefik.http.middlewares.kracker-dynamic-headers.headers.sslHost=${DOMAIN}"
 
-      - "traefik.http.routers.kracker-backend.middlewares=security-headers@file, backend-stripprefix@file, kracker-dynamic-headers"
+      - "traefik.http.routers.kracker-backend.middlewares=security-headers@file, backend-strip-prefix@file, kracker-dynamic-headers"
 
   frontend:
     image: kracker-frontend:local
@@ -84,12 +86,15 @@ services:
       - kracker
     labels:
       - "traefik.enable=true"
-      - "traefik.http.routers.frontend.entrypoints=web, web-secured"
+
+      - "traefik.http.services.kracker-frontend-service.loadbalancer.server.port=3000"
+
+      - "traefik.http.routers.kracker-frontend.entrypoints=web, web-secured"
       - "traefik.http.routers.kracker-frontend.tls=true"
-      - "traefik.http.routers.frontend.rule=Host(`${SUBDOMAIN}.${DOMAIN}`) && (!PathPrefix(`/back`))"
-      - "traefik.http.routers.frontend.middlewares=security-headers@file, kracker-dynamic-headers"
-      - "traefik.http.routers.frontend.service=frontend-service"
-      - "traefik.http.services.frontend-service.loadbalancer.server.port=3000"
+      - "traefik.http.routers.kracker-frontend.rule=Host(`kracker.${DOMAIN}`) && (!PathPrefix(`/back`))"
+      - "traefik.http.routers.kracker-frontend.service=kracker-frontend-service"
+
+      - "traefik.http.routers.kracker-frontend.middlewares=security-headers@file, kracker-dynamic-headers"
 
   db:
     image: "postgres:17-alpine"
