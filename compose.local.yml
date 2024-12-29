@@ -20,8 +20,6 @@ services:
         max-size: "10m"
     networks:
       - kracker
-    labels:
-      - "traefik.enable=true"
 
   backend:
     image: kracker-backend:local
