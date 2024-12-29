@@ -1,4 +1,21 @@
 services:
+  db:
+    image: "postgres:17-alpine"
+    ports:
+      - "5432:5432"
+    environment:
+      - POSTGRES_USER=${DB_USER}
+      - POSTGRES_PASSWORD=${DB_PASSWORD}
+      - POSTGRES_DB=${DB_NAME}
+    volumes:
+      - ./db_data:/var/lib/postgresql/data
+    logging:
+      driver: "local"
+      options:
+        max-size: "10m"
+    networks:
+      - kracker
+
   traefik:
     image: traefik:v3.2
     ports:
@@ -32,7 +49,7 @@ services:
       - "traefik.http.routers.dashboard.service=api@internal"
 
   backend:
-    image: kracker-backend:local
+    image: kracker-backend:${KRACKER_VERSION}
     env_file:
       - back/.env.local
     logging:
@@ -55,7 +72,7 @@ services:
       - "traefik.http.routers.kracker-backend.middlewares=kracker-security-headers@file, kracker-backend-strip-prefix@file, kracker-dynamic-headers"
 
   frontend:
-    image: kracker-frontend:local
+    image: kracker-frontend:${KRACKER_VERSION}
     env_file:
       - front/.env.local
     logging:
@@ -74,23 +91,6 @@ services:
       - "traefik.http.routers.kracker-frontend.service=kracker-frontend-service"
 
       - "traefik.http.routers.kracker-frontend.middlewares=kracker-security-headers@file, kracker-frontend-security-headers@file, kracker-dynamic-headers"
-
-  db:
-    image: "postgres:17-alpine"
-    ports:
-      - "5432:5432"
-    environment:
-      - POSTGRES_USER=${DB_USER}
-      - POSTGRES_PASSWORD=${DB_PASSWORD}
-      - POSTGRES_DB=${DB_NAME}
-    volumes:
-      - ./db_data:/var/lib/postgresql/data
-    logging:
-      driver: "local"
-      options:
-        max-size: "10m"
-    networks:
-      - kracker
 
 networks:
   kracker:
