@@ -1,8 +1,8 @@
 set dotenv-filename := "back/.env.local"
 
 build:
-    docker build --pull -t kracker-backend:local -f deploy/back/Dockerfile . \
-    && docker build --pull -t kracker-frontend:local -f deploy/front/Dockerfile . \
+    docker build --pull -t kracker-backend:local -f deploy/back/Dockerfile ./back \
+    && docker build --pull -t kracker-frontend:local -f deploy/front/Dockerfile ./front \
     && docker compose -f compose.local.yaml up
 
 tidy:
