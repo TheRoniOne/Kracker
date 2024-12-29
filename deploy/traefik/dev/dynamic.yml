@@ -1,0 +1,7 @@
+http:
+  routers:
+    self:
+      rule: PathPrefix(`/`)
+      service: api@internal
+      entryPoints:
+        - web-traefik

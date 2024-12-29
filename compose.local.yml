@@ -14,28 +14,14 @@ services:
         mode: ingress
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock:ro
+      - ./deploy/traefik/dev/static.yml:/etc/traefik/traefik.yml:ro
+      - ./deploy/traefik/dev/dynamic.yml:/etc/traefik/dynamic.yml:ro
     logging:
       driver: "local"
       options:
         max-size: "10m"
     networks:
       - kracker
-    command:
-      - "--log.level=DEBUG"
-      - "--log.format=json"
-      - "--accesslog=true"
-      - "--accesslog.format=json"
-      - "--accesslog.fields.defaultmode=keep"
-      - "--api.insecure=true"
-      - "--providers.docker=true"
-      - "--providers.docker.exposedbydefault=false"
-      - "--entryPoints.web-traefik.address=:8085"
-      - "--entryPoints.web.address=:80"
-    labels:
-      - "traefik.enable=true"
-      - "traefik.http.routers.self.entrypoints=web-traefik"
-      - "traefik.http.routers.self.service=api@internal"
-      - "traefik.http.routers.self.rule=PathPrefix(`/`)"
 
   backend:
     image: kracker-backend:local

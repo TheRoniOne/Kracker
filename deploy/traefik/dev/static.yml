@@ -1,0 +1,24 @@
+log:
+  level: DEBUG
+  format: json
+
+accessLog:
+  format: "json"
+  fields:
+    defaultMode: keep
+
+api:
+  insecure: true
+
+providers:
+  file:
+    filename: /etc/traefik/dynamic.yml
+  docker:
+    endpoint: "unix:///var/run/docker.sock"
+    exposedByDefault: false
+
+entryPoints:
+  web-traefik:
+    address: ":8085"
+  web:
+    address: ":80"
