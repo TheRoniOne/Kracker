@@ -1,0 +1,39 @@
+http:
+  middlewares:
+    kracker-security-headers:
+      headers:
+        # Security Headers
+        framedeny: "true"
+        browserxssfilter: "true"
+        # X-Content-Type-Options
+        contentTypeNosniff: "true"
+        # Referrer-Policy
+        referrerPolicy: "strict-origin-when-cross-origin"
+        # Access-Control Headers
+        accesscontrolallowmethods: "GET,POST,PATCH,DELETE"
+        accesscontrolallowheaders: "Content-Type"
+        accesscontrolmaxage: "100"
+        addvaryheader: "true"
+        customResponseHeaders:
+          # CORS Headers
+          Cross-Origin-Opener-Policy: "same-origin"
+          Cross-Origin-Embedder-Policy: "require-corp"
+          Cross-Origin-Resource-Policy: "same-site"
+          # Custom Headers Hardening
+          expect-ct: ""
+          server: ""
+          x-powered-by: ""
+          x-dns-prefetch-control: "off"
+          public-key-pins: ""
+
+    kracker-frontend-security-headers:
+      headers:
+        customResponseHeaders:
+          # Permissions-Policy
+          permissionsPolicy: "geolocation=(), camera=(), microphone=(), interest-cohort=()"
+          # Content-Security-Policy
+          contentSecurityPolicy: "default-src 'none'; script-src 'self'; connect-src 'self'; img-src 'self'; style-src 'self'; frame-ancestors 'self'; form-action 'self';"
+
+    kracker-backend-strip-prefix:
+      stripPrefix:
+        prefixes: /back

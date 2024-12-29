@@ -1,0 +1,97 @@
+services:
+  traefik:
+    image: traefik:v3.2
+    ports:
+      - target: 80
+        published: 80
+        protocol: tcp
+        mode: ingress
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+      - ./deploy/traefik/dynamic.yml:/etc/traefik/dynamic.yml:ro
+    logging:
+      driver: "local"
+      options:
+        max-size: "10m"
+    networks:
+      - kracker
+    command:
+      - "--log.level=DEBUG"
+      - "--accesslog=true"
+      - "--accesslog.fields.defaultmode=keep"
+      - "--providers.file.filename=/etc/traefik/dynamic.yml"
+      - "--providers.docker=true"
+      - "--providers.docker.exposedbydefault=false"
+      - "--entryPoints.web.address=:80"
+      - "--api.insecure=true"
+    labels:
+      - "traefik.enable=true"
+
+      - "traefik.http.routers.dashboard.entrypoints=web"
+      - "traefik.http.routers.dashboard.rule=Host(`kracker.traefik.${DOMAIN}`)"
+      - "traefik.http.routers.dashboard.service=api@internal"
+
+  backend:
+    image: kracker-backend:local
+    env_file:
+      - back/.env.local
+    logging:
+      driver: "local"
+      options:
+        max-size: "10m"
+    networks:
+      - kracker
+    labels:
+      - "traefik.enable=true"
+
+      - "traefik.http.services.kracker-backend-service.loadbalancer.server.port=1323"
+
+      - "traefik.http.routers.kracker-backend.entrypoints=web"
+      - "traefik.http.routers.kracker-backend.rule=Host(`kracker.${DOMAIN}`) && PathPrefix(`/back`)"
+      - "traefik.http.routers.kracker-backend.service=kracker-backend-service"
+
+      - "traefik.http.middlewares.kracker-dynamic-headers.headers.accesscontrolalloworiginlist=http://${DOMAIN}"
+
+      - "traefik.http.routers.kracker-backend.middlewares=kracker-security-headers@file, kracker-backend-strip-prefix@file, kracker-dynamic-headers"
+
+  frontend:
+    image: kracker-frontend:local
+    env_file:
+      - front/.env.local
+    logging:
+      driver: "local"
+      options:
+        max-size: "10m"
+    networks:
+      - kracker
+    labels:
+      - "traefik.enable=true"
+
+      - "traefik.http.services.kracker-frontend-service.loadbalancer.server.port=3000"
+
+      - "traefik.http.routers.kracker-frontend.entrypoints=web"
+      - "traefik.http.routers.kracker-frontend.rule=Host(`kracker.${DOMAIN}`) && (!PathPrefix(`/back`))"
+      - "traefik.http.routers.kracker-frontend.service=kracker-frontend-service"
+
+      - "traefik.http.routers.kracker-frontend.middlewares=kracker-security-headers@file, kracker-frontend-security-headers@file, kracker-dynamic-headers"
+
+  db:
+    image: "postgres:17-alpine"
+    ports:
+      - "5432:5432"
+    environment:
+      - POSTGRES_USER=${DB_USER}
+      - POSTGRES_PASSWORD=${DB_PASSWORD}
+      - POSTGRES_DB=${DB_NAME}
+    volumes:
+      - ./db_data:/var/lib/postgresql/data
+    logging:
+      driver: "local"
+      options:
+        max-size: "10m"
+    networks:
+      - kracker
+
+networks:
+  kracker:
+    driver: bridge
