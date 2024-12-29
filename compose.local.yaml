@@ -8,8 +8,8 @@ services:
         published: 80
         protocol: tcp
         mode: ingress
-      - target: 8080
-        published: 8080
+      - target: 8085
+        published: 8085
         protocol: tcp
         mode: ingress
     volumes:
@@ -29,7 +29,13 @@ services:
       - "--api.insecure=true"
       - "--providers.docker=true"
       - "--providers.docker.exposedbydefault=false"
+      - "--entryPoints.web-traefik.address=:8085"
       - "--entryPoints.web.address=:80"
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.self.entrypoints=web-traefik"
+      - "traefik.http.routers.self.service=api@internal"
+      - "traefik.http.routers.self.rule=PathPrefix(`/`)"
 
   backend:
     image: kracker-backend:local
