@@ -22,6 +22,8 @@ services:
         max-size: "10m"
     networks:
       - kracker
+    labels:
+      - "traefik.enable=true"
 
   backend:
     image: kracker-backend:local
@@ -33,6 +35,8 @@ services:
         max-size: "10m"
     networks:
       - kracker
+    labels:
+      - "traefik.enable=true"
 
   frontend:
     image: kracker-frontend:local
@@ -44,6 +48,9 @@ services:
         max-size: "10m"
     networks:
       - kracker
+    labels:
+      - "traefik.enable=true"
+
   db:
     image: "postgres:17-alpine"
     ports:

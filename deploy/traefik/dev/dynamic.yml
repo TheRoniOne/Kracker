@@ -1,14 +1,4 @@
 http:
-  services:
-    backend:
-      loadbalancer:
-        servers:
-          - address: backend:8080
-    frontend:
-      loadbalancer:
-        servers:
-          - address: frontend:3000
-
   routers:
     self:
       entryPoints:
@@ -49,20 +39,19 @@ http:
         accesscontrolalloworiginlist: "http://localhost"
         accesscontrolmaxage: "100"
         addvaryheader: "true"
-        # CORS Headers
         customResponseHeaders:
+          # CORS Headers
           Cross-Origin-Opener-Policy: "same-origin"
           Cross-Origin-Embedder-Policy: "require-corp"
           Cross-Origin-Resource-Policy: "same-site"
-        # Permissions-Policy
-        permissionsPolicy: "geolocation=(), camera=(), microphone=(), interest-cohort=()"
-        # Custom Headers Hardening
-        customResponseHeaders:
+          # Custom Headers Hardening
           expect-ct: ""
           server: ""
           x-powered-by: ""
           x-dns-prefetch-control: "off"
           public-key-pins: ""
+        # Permissions-Policy
+        permissionsPolicy: "geolocation=(), camera=(), microphone=(), interest-cohort=()"
         # Content-Security-Policy
         contentSecurityPolicy: "default-src 'none'; script-src 'self'; connect-src 'self'; img-src 'self'; style-src 'self'; frame-ancestors 'self'; form-action 'self';"
 

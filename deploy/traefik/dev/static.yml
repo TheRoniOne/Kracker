@@ -1,6 +1,6 @@
 log:
   level: DEBUG
-  format: json
+  # format: json
 
 accessLog:
   format: "json"
