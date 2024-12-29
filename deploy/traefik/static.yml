@@ -1,5 +1,5 @@
 log:
-  level: DEBUG
+  level: DEBUG # DEBUG for initial setup, recommended to change to INFO for production ready
   format: "json"
 
 accessLog:
@@ -30,7 +30,7 @@ entryPoints:
           scheme: https
 
 certificatesResolvers:
-  myresolver:
+  letsencrypt:
     acme:
       email: "your@email.com"
       storage: "/letsencrypt/acme.json"

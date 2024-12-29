@@ -17,6 +17,11 @@ http:
         contentTypeNosniff: "true"
         # Referrer-Policy
         referrerPolicy: "strict-origin-when-cross-origin"
+        # Strict-Transport-Security
+        stsSeconds: "63072000"
+        stsIncludeSubdomains: "true"
+        stsPreload: "true"
+        forceSTSHeader: "true"
         # Access-Control Headers
         accesscontrolallowmethods: "GET,POST,PATCH,DELETE"
         accesscontrolallowheaders: "Content-Type"
@@ -37,6 +42,7 @@ http:
         permissionsPolicy: "geolocation=(), camera=(), microphone=(), interest-cohort=()"
         # Content-Security-Policy
         contentSecurityPolicy: "default-src 'none'; script-src 'self'; connect-src 'self'; img-src 'self'; style-src 'self'; frame-ancestors 'self'; form-action 'self';"
+        sslHost: "${DOMAIN}" # move to compose
 
     backend-stripprefix:
       stripPrefix:

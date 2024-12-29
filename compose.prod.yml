@@ -1,0 +1,103 @@
+services:
+  traefik:
+    image: traefik:v3.2
+    ports:
+      - target: 80
+        published: 80
+        protocol: tcp
+        mode: ingress
+      - target: 8085
+        published: 8085
+        protocol: tcp
+        mode: ingress
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+    logging:
+      driver: "local"
+      options:
+        max-size: "10m"
+    networks:
+      - kracker
+    command:
+      - "--log.level=DEBUG"
+      - "--log.format=json"
+      - "--accesslog=true"
+      - "--accesslog.format=json"
+      - "--accesslog.fields.defaultmode=keep"
+      - "--api=true"
+      - "--providers.docker=true"
+      - "--providers.docker.exposedbydefault=false"
+      - "--entryPoints.web-traefik.address=:8085"
+      - "--entryPoints.web.address=:80"
+      - "--entryPoints.web-secured.address=:443"
+      - "--entryPoints.web.http.redirections.entrypoint.to=web-secure"
+      - "--entryPoints.web.http.redirections.entrypoint.scheme=https"
+      - "--certificatesresolvers.letsencrypt.acme.email=${SSL_EMAIL}"
+      - "--certificatesresolvers.letsencrypt.acme.storage=/letsencrypt/acme.json"
+      - "--certificatesresolvers.letsencrypt.acme.dnschallenge.provider=cloudflare"
+      - "--certificatesresolvers.letsencrypt.acme.dnschallenge.delaybeforecheck=0"
+      - "--certificatesresolvers.letsencrypt.acme.dnschallenge.resolvers=1.1.1.1:53,8.8.8.8:53"
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.self.entrypoints=web-traefik"
+      - "traefik.http.routers.self.service=api@internal"
+      - "traefik.http.routers.self.rule=Host(`traefik.${DOMAIN}`) && PathPrefix(`/`)"
+
+  backend:
+    image: kracker-backend:local
+    env_file:
+      - back/.env.local
+    logging:
+      driver: "local"
+      options:
+        max-size: "10m"
+    networks:
+      - kracker
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.backend.entrypoints=web"
+      - "traefik.http.routers.backend.rule=Host(`${DOMAIN}`) && PathPrefix(`/back`)"
+      - "traefik.http.routers.backend.service=backend-service"
+      - "traefik.http.services.backend-service.loadbalancer.server.port=1323"
+
+      - "traefik.http.middlewares.dynamic-headers.headers.accesscontrolalloworiginlist=http://${DOMAIN}"
+      - "traefik.http.routers.backend.middlewares=security-headers@file, backend-stripprefix@file, dynamic-headers"
+
+  frontend:
+    image: kracker-frontend:local
+    env_file:
+      - front/.env.local
+    logging:
+      driver: "local"
+      options:
+        max-size: "10m"
+    networks:
+      - kracker
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.frontend.entrypoints=web"
+      - "traefik.http.routers.frontend.rule=Host(`${DOMAIN}`) && (!PathPrefix(`/back`))"
+      - "traefik.http.routers.frontend.middlewares=security-headers@file, dynamic-headers"
+      - "traefik.http.routers.frontend.service=frontend-service"
+      - "traefik.http.services.frontend-service.loadbalancer.server.port=3000"
+
+  db:
+    image: "postgres:17-alpine"
+    ports:
+      - "5432:5432"
+    environment:
+      - POSTGRES_USER=${DB_USER}
+      - POSTGRES_PASSWORD=${DB_PASSWORD}
+      - POSTGRES_DB=${DB_NAME}
+    volumes:
+      - ./db_data:/var/lib/postgresql/data
+    logging:
+      driver: "local"
+      options:
+        max-size: "10m"
+    networks:
+      - kracker
+
+networks:
+  kracker:
+    driver: bridge
