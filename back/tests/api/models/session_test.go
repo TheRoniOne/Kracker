@@ -50,7 +50,7 @@ func TestSessionCreate(t *testing.T) {
 	require.NoError(t, err)
 
 	if assert.Equal(t, http.StatusOK, response.StatusCode) {
-		sessionCookie := response.Cookies()[0]
+		sessionCookie := response.Cookies()[1]
 
 		assert.Equal(t, "SESSION", sessionCookie.Name)
 		assert.NotEmpty(t, sessionCookie.Value)
