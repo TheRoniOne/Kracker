@@ -42,9 +42,11 @@ services:
       - "--api=true"
     labels:
       - "traefik.enable=true"
+
       - "traefik.http.routers.dashboard.entrypoints=web, websecured"
-      - "traefik.http.routers.dashboard.service=api@internal"
       - "traefik.http.routers.dashboard.rule=Host(`kracker.traefik.${DOMAIN}`)"
+      - "traefik.http.routers.dashboard.service=api@internal"
+
       - "traefik.http.routers.dashboard.tls=true"
       - "traefik.http.routers.dashboard.middlewares=auth"
       - "traefik.http.middlewares.auth.basicauth.usersfile=/run/secrets/traefik_users"

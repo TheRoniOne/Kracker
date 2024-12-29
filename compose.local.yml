@@ -26,10 +26,10 @@ services:
       - "--api.insecure=true"
     labels:
       - "traefik.enable=true"
+
       - "traefik.http.routers.dashboard.entrypoints=web"
-      - "traefik.http.routers.dashboard.service=api@internal"
       - "traefik.http.routers.dashboard.rule=Host(`kracker.traefik.${DOMAIN}`)"
-      - "traefik.http.routers.dashboard.tls=true"
+      - "traefik.http.routers.dashboard.service=api@internal"
 
   backend:
     image: kracker-backend:local
