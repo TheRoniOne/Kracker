@@ -1,0 +1,52 @@
+# This workflow will build a golang project
+# For more information see: https://docs.github.com/en/actions/automating-builds-and-tests/building-and-testing-go
+
+name: Go
+
+on:
+  push:
+    branches: [ "main" ]
+  pull_request:
+    branches: [ "main" ]
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+
+    services:
+      docker:
+        image: docker:dind
+        options: --tls=false
+        
+    steps:
+    - uses: actions/checkout@v4
+
+    - name: Set up Go
+      uses: actions/setup-go@v4
+      with:
+        go-version: '1.23'
+
+    - name: Install dependencies
+        run: |
+          cd back
+          go mod tidy 
+
+    - name: Run Go tests
+        run: |
+          cd back
+          go run gotest.tools/gotestsum@latest --junitfile junit.xml -- -v -coverpkg=./... -coverprofile=profile.cov ./...
+          go tool cover -func profile.cov
+
+    - name: Upload test results and coverage report
+        uses: actions/upload-artifact@v4
+        with:
+          name: go-test-artifacts
+          path: |
+            back/junit.xml
+            back/profile.cov
+
+    - name: Upload coverage report
+        uses: codecov/codecov-action@v4
+        with:
+          file: back/profile.cov
+          flags: unittests
