@@ -71,8 +71,8 @@ jobs:
           context: .
           file: deploy/back/Dockerfile
           push: ${{ github.event_name != 'pull_request' }}
-          tags: ${{ steps.meta.outputs.tags }}
-          labels: ${{ steps.meta.outputs.labels }}
+          tags: $GITHUB_REF_NAME-backend
+          labels: $GITHUB_REF_NAME-backend
           cache-from: type=gha
           cache-to: type=gha,mode=max
 
