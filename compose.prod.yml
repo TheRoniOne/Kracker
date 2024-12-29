@@ -96,7 +96,7 @@ services:
       - "traefik.http.routers.kracker-frontend.rule=Host(`kracker.${DOMAIN}`) && (!PathPrefix(`/back`))"
       - "traefik.http.routers.kracker-frontend.service=kracker-frontend-service"
 
-      - "traefik.http.routers.kracker-frontend.middlewares=kracker-security-headers@file, kracker-dynamic-headers"
+      - "traefik.http.routers.kracker-frontend.middlewares=kracker-security-headers@file, kracker-frontend-security-headers@file, kracker-dynamic-headers"
 
   db:
     image: "postgres:17-alpine"
