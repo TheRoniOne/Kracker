@@ -31,8 +31,8 @@ services:
       - "--providers.docker=true"
       - "--providers.docker.exposedbydefault=false"
       - "--entryPoints.web.address=:80"
-      - "--entryPoints.web-secured.address=:443"
-      - "--entryPoints.web.http.redirections.entrypoint.to=web-secure"
+      - "--entryPoints.websecured.address=:443"
+      - "--entryPoints.web.http.redirections.entrypoint.to=websecure"
       - "--entryPoints.web.http.redirections.entrypoint.scheme=https"
       - "--certificatesresolvers.letsencrypt.acme.email=${SSL_EMAIL}"
       - "--certificatesresolvers.letsencrypt.acme.storage=/letsencrypt/acme.json"
@@ -42,7 +42,7 @@ services:
       - "--api=true"
     labels:
       - "traefik.enable=true"
-      - "traefik.http.routers.dashboard.entrypoints=web, web-secured"
+      - "traefik.http.routers.dashboard.entrypoints=web, websecured"
       - "traefik.http.routers.dashboard.service=api@internal"
       - "traefik.http.routers.dashboard.rule=Host(`kracker.traefik.${DOMAIN}`)"
       - "traefik.http.routers.dashboard.tls=true"
@@ -64,7 +64,7 @@ services:
 
       - "traefik.http.services.kracker-backend-service.loadbalancer.server.port=1323"
 
-      - "traefik.http.routers.kracker-backend.entrypoints=web, web-secured"
+      - "traefik.http.routers.kracker-backend.entrypoints=web, websecured"
       - "traefik.http.routers.kracker-backend.tls=true"
       - "traefik.http.routers.kracker-backend.rule=Host(`kracker.${DOMAIN}`) && PathPrefix(`/back`)"
       - "traefik.http.routers.kracker-backend.service=kracker-backend-service"
@@ -89,7 +89,7 @@ services:
 
       - "traefik.http.services.kracker-frontend-service.loadbalancer.server.port=3000"
 
-      - "traefik.http.routers.kracker-frontend.entrypoints=web, web-secured"
+      - "traefik.http.routers.kracker-frontend.entrypoints=web, websecured"
       - "traefik.http.routers.kracker-frontend.tls=true"
       - "traefik.http.routers.kracker-frontend.rule=Host(`kracker.${DOMAIN}`) && (!PathPrefix(`/back`))"
       - "traefik.http.routers.kracker-frontend.service=kracker-frontend-service"
