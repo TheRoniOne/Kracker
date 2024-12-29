@@ -6,20 +6,31 @@ services:
         published: 80
         protocol: tcp
         mode: ingress
-      - target: 8085
-        published: 8085
-        protocol: tcp
-        mode: ingress
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock:ro
-      - ./deploy/traefik/dev/static.yml:/etc/traefik/traefik.yml:ro
-      - ./deploy/traefik/dev/dynamic.yml:/etc/traefik/dynamic.yml:ro
+      - ./deploy/traefik/static.yml:/etc/traefik/traefik.yml:ro
+      - ./deploy/traefik/dynamic.yml:/etc/traefik/dynamic.yml:ro
     logging:
       driver: "local"
       options:
         max-size: "10m"
     networks:
       - kracker
+    command:
+      - "--log.level=DEBUG"
+      - "--accesslog=true"
+      - "--accesslog.fields.defaultmode=keep"
+      - "--providers.file.filename=/etc/traefik/dynamic.yml"
+      - "--providers.docker=true"
+      - "--providers.docker.exposedbydefault=false"
+      - "--entryPoints.web.address=:80"
+      - "--api.insecure=true"
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.dashboard.entrypoints=web"
+      - "traefik.http.routers.dashboard.service=api@internal"
+      - "traefik.http.routers.dashboard.rule=Host(`traefik.${DOMAIN}`)"
+      - "traefik.http.routers.dashboard.tls=true"
 
   backend:
     image: kracker-backend:local

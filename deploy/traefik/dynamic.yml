@@ -1,13 +1,6 @@
 http:
-  routers:
-    dashboard:
-      entryPoints:
-        - web-traefik
-      rule: PathPrefix(`/`)
-      service: api@internal
-
   middlewares:
-    security-headers:
+    kracker-security-headers:
       headers:
         # Security Headers
         framedeny: "true"
@@ -37,6 +30,6 @@ http:
         # Content-Security-Policy
         contentSecurityPolicy: "default-src 'none'; script-src 'self'; connect-src 'self'; img-src 'self'; style-src 'self'; frame-ancestors 'self'; form-action 'self';"
 
-    backend-strip-prefix:
+    kracker-backend-strip-prefix:
       stripPrefix:
         prefixes: /back

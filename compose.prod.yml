@@ -10,12 +10,9 @@ services:
         published: 443
         protocol: tcp
         mode: ingress
-      - target: 8085
-        published: 8085
-        protocol: tcp
-        mode: ingress
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock:ro
+      - ./traefik/dynamic.yml:/etc/traefik/dynamic.yml:ro
     logging:
       driver: "local"
       options:
@@ -33,7 +30,6 @@ services:
       - "--providers.file.filename=/etc/traefik/dynamic.yml"
       - "--providers.docker=true"
       - "--providers.docker.exposedbydefault=false"
-      - "--entryPoints.web-traefik.address=:8085"
       - "--entryPoints.web.address=:80"
       - "--entryPoints.web-secured.address=:443"
       - "--entryPoints.web.http.redirections.entrypoint.to=web-secure"
@@ -46,9 +42,9 @@ services:
       - "--api=true"
     labels:
       - "traefik.enable=true"
-      - "traefik.http.routers.dashboard.entrypoints=web-traefik"
+      - "traefik.http.routers.dashboard.entrypoints=web, web-secured"
       - "traefik.http.routers.dashboard.service=api@internal"
-      - "traefik.http.routers.dashboard.rule=Host(`kracker.traefik.${DOMAIN}`) && PathPrefix(`/`)"
+      - "traefik.http.routers.dashboard.rule=Host(`kracker.traefik.${DOMAIN}`)"
       - "traefik.http.routers.dashboard.tls=true"
       - "traefik.http.routers.dashboard.middlewares=auth"
       - "traefik.http.middlewares.auth.basicauth.usersfile=/run/secrets/traefik_users"
@@ -76,7 +72,7 @@ services:
       - "traefik.http.middlewares.kracker-dynamic-headers.headers.accesscontrolalloworiginlist=http://${DOMAIN}"
       - "traefik.http.middlewares.kracker-dynamic-headers.headers.sslHost=${DOMAIN}"
 
-      - "traefik.http.routers.kracker-backend.middlewares=security-headers@file, backend-strip-prefix@file, kracker-dynamic-headers"
+      - "traefik.http.routers.kracker-backend.middlewares=kracker-security-headers@file, kracker-backend-strip-prefix@file, kracker-dynamic-headers"
 
   frontend:
     image: kracker-frontend:local
@@ -98,7 +94,7 @@ services:
       - "traefik.http.routers.kracker-frontend.rule=Host(`kracker.${DOMAIN}`) && (!PathPrefix(`/back`))"
       - "traefik.http.routers.kracker-frontend.service=kracker-frontend-service"
 
-      - "traefik.http.routers.kracker-frontend.middlewares=security-headers@file, kracker-dynamic-headers"
+      - "traefik.http.routers.kracker-frontend.middlewares=kracker-security-headers@file, kracker-dynamic-headers"
 
   db:
     image: "postgres:17-alpine"
@@ -117,9 +113,9 @@ services:
 
 secrets:
   db_password:
-    file: $DB_PASSWORD
+    file: ./db_password
   traefik_users:
-    file: $TRAEFIK_USERS
+    file: ./traefik_users
 
 networks:
   kracker:
