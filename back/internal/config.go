@@ -23,8 +23,6 @@ var (
 
 	TimeLocation = getTimeLocation("TIME_LOCATION")
 
-	RateLimit = parseIntEnv("RATE_LIMIT", 10)
-
 	RootPath          = getRootPath()
 	SessionMaxAgeDays = parseIntEnv("SESSION_MAX_AGE_DAYS", 30)
 

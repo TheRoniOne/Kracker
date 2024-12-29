@@ -7,7 +7,6 @@ import (
 	"github.com/TheRoniOne/Kracker/middleware"
 	"github.com/labstack/echo/v4"
 	echomiddleware "github.com/labstack/echo/v4/middleware"
-	"golang.org/x/time/rate"
 )
 
 func StartServer(e *echo.Echo, address string, exit chan bool) {
@@ -22,7 +21,6 @@ func StartServer(e *echo.Echo, address string, exit chan bool) {
 		CookieSameSite: http.SameSiteStrictMode,
 	}))
 	e.Use(echomiddleware.Recover())
-	e.Use(echomiddleware.RateLimiter(echomiddleware.NewRateLimiterMemoryStore(rate.Limit(RateLimit))))
 
 	e.Use(middleware.RequestIDMiddleware())
 	e.Use(middleware.LoggingMiddleware())
