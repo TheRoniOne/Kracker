@@ -75,9 +75,6 @@ services:
       - "traefik.http.middlewares.backend-headers.headers.customResponseHeaders.x-dns-prefetch-control=off"
       - "traefik.http.middlewares.backend-headers.headers.customResponseHeaders.public-key-pins="
 
-      # Content-Security-Policy
-      - "traefik.http.middlewares.backend-headers.headers.contentSecurityPolicy=default-src 'none'; script-src 'self'; connect-src 'self'; img-src 'self'; style-src 'self'; frame-ancestors 'self'; form-action 'self';"
-
   frontend:
     image: kracker-frontend:local
     env_file:
@@ -88,6 +85,41 @@ services:
         max-size: "10m"
     networks:
       - kracker
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.frontend.entrypoints=web"
+      - "traefik.http.routers.frontend.rule=Host(`${DOMAIN}`) && (!PathPrefix(`/back`))"
+      - "traefik.http.routers.frontend.middlewares=frontend-headers"
+      - "traefik.http.routers.frontend.service=frontend-service"
+      - "traefik.http.services.frontend-service.loadbalancer.server.port=3000"
+      # Security Headers
+      - "traefik.http.middlewares.frontend-headers.headers.framedeny=true"
+      - "traefik.http.middlewares.frontend-headers.headers.browserxssfilter=true"
+      # X-Content-Type-Options
+      - "traefik.http.middlewares.frontend-headers.headers.contentTypeNosniff=true"
+      # Referrer-Policy
+      - "traefik.http.middlewares.frontend-headers.headers.referrerPolicy=strict-origin-when-cross-origin"
+      # Access-Control Headers
+      - "traefik.http.middlewares.frontend-headers.headers.accesscontrolallowmethods=GET,POST,PATCH,DELETE"
+      - "traefik.http.middlewares.frontend-headers.headers.accesscontrolallowheaders=Content-Type"
+      - "traefik.http.middlewares.frontend-headers.headers.accesscontrolalloworiginlist=http://localhost"
+      - "traefik.http.middlewares.frontend-headers.headers.accesscontrolmaxage=100"
+      - "traefik.http.middlewares.frontend-headers.headers.addvaryheader=true"
+      # CORS Headers
+      - "traefik.http.middlewares.frontend-headers.headers.customResponseHeaders.Cross-Origin-Opener-Policy=same-origin;"
+      - "traefik.http.middlewares.frontend-headers.headers.customResponseHeaders.Cross-Origin-Embedder-Policy=require-corp;"
+      - "traefik.http.middlewares.frontend-headers.headers.customResponseHeaders.Cross-Origin-Resource-Policy=same-site;"
+      # Permissions-Policy
+      - "traefik.http.middlewares.frontend-headers.headers.permissionsPolicy=geolocation=(),camera=(),interest-cohort=()"
+      # Custom Headers Hardening
+      - "traefik.http.middlewares.frontend-headers.headers.customResponseHeaders.expect-ct="
+      - "traefik.http.middlewares.frontend-headers.headers.customResponseHeaders.server="
+      - "traefik.http.middlewares.frontend-headers.headers.customResponseHeaders.x-powered-by="
+      - "traefik.http.middlewares.frontend-headers.headers.customResponseHeaders.x-dns-prefetch-control=off"
+      - "traefik.http.middlewares.frontend-headers.headers.customResponseHeaders.public-key-pins="
+
+      # Content-Security-Policy
+      - "traefik.http.middlewares.frontend-headers.headers.contentSecurityPolicy=default-src 'none'; script-src 'self'; connect-src 'self'; img-src 'self'; style-src 'self'; frame-ancestors 'self'; form-action 'self';"
 
   db:
     image: "postgres:17-alpine"
