@@ -1,5 +1,3 @@
-version: "3.9"
-
 services:
   traefik:
     image: traefik:v3.2
@@ -37,6 +35,11 @@ services:
       - kracker
     labels:
       - "traefik.enable=true"
+      - "traefik.http.routers.backend.entrypoints=web"
+      - "traefik.http.routers.backend.rule=Host(`${DOMAIN}`) && PathPrefix(`/back`)"
+      - "traefik.http.routers.backend.middlewares=security-headers@file, backend-stripprefix@file"
+      - "traefik.http.routers.backend.service=backend-service"
+      - "traefik.http.services.backend-service.loadbalancer.server.port=1323"
 
   frontend:
     image: kracker-frontend:local
@@ -50,6 +53,11 @@ services:
       - kracker
     labels:
       - "traefik.enable=true"
+      - "traefik.http.routers.frontend.entrypoints=web"
+      - "traefik.http.routers.frontend.rule=Host(`${DOMAIN}`) && (!PathPrefix(`/back`))"
+      - "traefik.http.routers.frontend.middlewares=security-headers@file"
+      - "traefik.http.routers.frontend.service=frontend-service"
+      - "traefik.http.services.frontend-service.loadbalancer.server.port=3000"
 
   db:
     image: "postgres:17-alpine"

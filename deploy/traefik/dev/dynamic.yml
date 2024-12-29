@@ -6,23 +6,6 @@ http:
       rule: PathPrefix(`/`)
       service: api@internal
 
-    backend:
-      entryPoints:
-        - web
-      rule: Host(`${DOMAIN}`) && PathPrefix(`/back`)
-      middlewares:
-        - security-headers
-        - backend-stripprefix
-      service: backend
-
-    frontend:
-      entryPoints:
-        - web
-      rule: Host(`${DOMAIN}`) && (!PathPrefix(`/back`))
-      middlewares:
-        - security-headers
-      service: frontend
-
   middlewares:
     security-headers:
       headers:
