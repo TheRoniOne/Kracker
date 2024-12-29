@@ -1,6 +1,6 @@
 http:
   routers:
-    self:
+    dashboard:
       entryPoints:
         - web-traefik
       rule: PathPrefix(`/`)

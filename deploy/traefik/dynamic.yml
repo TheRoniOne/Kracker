@@ -1,14 +1,6 @@
 http:
-  routers:
-    self:
-      entryPoints:
-        - web-traefik
-      rule: PathPrefix(`/`)
-      service: api@internal
-      tls: {}
-
   middlewares:
-    security-headers:
+    kracker-security-headers:
       headers:
         # Security Headers
         framedeny: "true"
@@ -42,8 +34,7 @@ http:
         permissionsPolicy: "geolocation=(), camera=(), microphone=(), interest-cohort=()"
         # Content-Security-Policy
         contentSecurityPolicy: "default-src 'none'; script-src 'self'; connect-src 'self'; img-src 'self'; style-src 'self'; frame-ancestors 'self'; form-action 'self';"
-        sslHost: "${DOMAIN}" # move to compose
 
-    backend-stripprefix:
+    kracker-backend-stripprefix:
       stripPrefix:
         prefixes: /back

@@ -18,13 +18,15 @@ services:
         max-size: "10m"
     networks:
       - kracker
+    secrets:
+      - traefik_users
     command:
       - "--log.level=DEBUG"
       - "--log.format=json"
       - "--accesslog=true"
       - "--accesslog.format=json"
       - "--accesslog.fields.defaultmode=keep"
-      - "--api=true"
+      - "--providers.file.filename=/etc/traefik/dynamic.yml"
       - "--providers.docker=true"
       - "--providers.docker.exposedbydefault=false"
       - "--entryPoints.web-traefik.address=:8085"
@@ -37,11 +39,15 @@ services:
       - "--certificatesresolvers.letsencrypt.acme.dnschallenge.provider=cloudflare"
       - "--certificatesresolvers.letsencrypt.acme.dnschallenge.delaybeforecheck=0"
       - "--certificatesresolvers.letsencrypt.acme.dnschallenge.resolvers=1.1.1.1:53,8.8.8.8:53"
+      - "--api=true"
     labels:
       - "traefik.enable=true"
-      - "traefik.http.routers.self.entrypoints=web-traefik"
-      - "traefik.http.routers.self.service=api@internal"
-      - "traefik.http.routers.self.rule=Host(`traefik.${DOMAIN}`) && PathPrefix(`/`)"
+      - "traefik.http.routers.dashboard.entrypoints=web-traefik"
+      - "traefik.http.routers.dashboard.service=api@internal"
+      - "traefik.http.routers.dashboard.rule=Host(`${SUBDOMAIN}.traefik.${DOMAIN}`) && PathPrefix(`/`)"
+      - "traefik.http.routers.dashboard.tls=true"
+      - "traefik.http.routers.dashboard.middlewares=auth"
+      - "traefik.http.middlewares.auth.basicauth.usersfile=/run/secrets/traefik_users"
 
   backend:
     image: kracker-backend:local
@@ -55,13 +61,16 @@ services:
       - kracker
     labels:
       - "traefik.enable=true"
-      - "traefik.http.routers.backend.entrypoints=web"
-      - "traefik.http.routers.backend.rule=Host(`${DOMAIN}`) && PathPrefix(`/back`)"
-      - "traefik.http.routers.backend.service=backend-service"
-      - "traefik.http.services.backend-service.loadbalancer.server.port=1323"
+      - "traefik.http.routers.kracker-backend.entrypoints=web, web-secured"
+      - "traefik.http.routers.kracker-backend.tls=true"
+      - "traefik.http.routers.kracker-backend.rule=Host(`${SUBDOMAIN}.${DOMAIN}`) && PathPrefix(`/back`)"
+      - "traefik.http.routers.kracker-backend.service=backend-service"
+      - "traefik.http.services.kracker-backend-service.loadbalancer.server.port=1323"
 
-      - "traefik.http.middlewares.dynamic-headers.headers.accesscontrolalloworiginlist=http://${DOMAIN}"
-      - "traefik.http.routers.backend.middlewares=security-headers@file, backend-stripprefix@file, dynamic-headers"
+      - "traefik.http.middlewares.kracker-dynamic-headers.headers.accesscontrolalloworiginlist=http://${DOMAIN}"
+      - "traefik.http.middlewares.kracker-dynamic-headers.headers.sslHost=${DOMAIN}"
+
+      - "traefik.http.routers.kracker-backend.middlewares=security-headers@file, backend-stripprefix@file, kracker-dynamic-headers"
 
   frontend:
     image: kracker-frontend:local
@@ -75,9 +84,10 @@ services:
       - kracker
     labels:
       - "traefik.enable=true"
-      - "traefik.http.routers.frontend.entrypoints=web"
-      - "traefik.http.routers.frontend.rule=Host(`${DOMAIN}`) && (!PathPrefix(`/back`))"
-      - "traefik.http.routers.frontend.middlewares=security-headers@file, dynamic-headers"
+      - "traefik.http.routers.frontend.entrypoints=web, web-secured"
+      - "traefik.http.routers.kracker-frontend.tls=true"
+      - "traefik.http.routers.frontend.rule=Host(`${SUBDOMAIN}.${DOMAIN}`) && (!PathPrefix(`/back`))"
+      - "traefik.http.routers.frontend.middlewares=security-headers@file, kracker-dynamic-headers"
       - "traefik.http.routers.frontend.service=frontend-service"
       - "traefik.http.services.frontend-service.loadbalancer.server.port=3000"
 
@@ -85,12 +95,10 @@ services:
     image: "postgres:17-alpine"
     ports:
       - "5432:5432"
-    environment:
-      - POSTGRES_USER=${DB_USER}
-      - POSTGRES_PASSWORD=${DB_PASSWORD}
-      - POSTGRES_DB=${DB_NAME}
+    env_file:
+      - .env.db
     volumes:
-      - ./db_data:/var/lib/postgresql/data
+      - db_data:/var/lib/postgresql/data
     logging:
       driver: "local"
       options:
@@ -98,6 +106,15 @@ services:
     networks:
       - kracker
 
+secrets:
+  db_password:
+    file: $DB_PASSWORD
+  traefik_users:
+    file: $TRAEFIK_USERS
+
 networks:
   kracker:
     driver: bridge
+
+volumes:
+  db_data:
