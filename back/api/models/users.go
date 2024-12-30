@@ -14,11 +14,11 @@ type UserHandler struct {
 }
 
 type UserCreateParams struct {
-	Username  string `json:"username"`
-	Email     string `json:"email"`
-	Password  string `json:"password"`
-	Firstname string `json:"firstname"`
-	Lastname  string `json:"lastname"`
+	Username  string `json:"username" validate:"required"`
+	Email     string `json:"email" validate:"required,email"`
+	Password  string `json:"password" validate:"required"`
+	Firstname string `json:"firstname" validate:"required"`
+	Lastname  string `json:"lastname" validate:"required"`
 }
 
 func (h *UserHandler) Create(c echo.Context) error {
@@ -27,6 +27,15 @@ func (h *UserHandler) Create(c echo.Context) error {
 	err := c.Bind(&user)
 	if err != nil {
 		return echo.ErrBadRequest
+	}
+
+	err = c.Validate(user)
+	if err != nil {
+		slog.Error("Failed to validate user create params",
+			"error", err.Error())
+		return c.JSON(http.StatusBadRequest, map[string]string{
+			"error": err.Error(),
+		})
 	}
 
 	saltedHash, err := internal.CreateSaltedHash(user.Password)

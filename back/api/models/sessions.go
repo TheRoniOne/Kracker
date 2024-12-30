@@ -28,6 +28,15 @@ func (h *SessionHandler) Create(c echo.Context) error {
 		return echo.ErrBadRequest
 	}
 
+	err = c.Validate(loginParams)
+	if err != nil {
+		slog.Error("Failed to validate login params",
+			"error", err.Error())
+		return c.JSON(http.StatusBadRequest, map[string]string{
+			"error": err.Error(),
+		})
+	}
+
 	userData, err := h.Queries.GetUserFromUsername(c.Request().Context(), loginParams.Username)
 	if err != nil {
 		slog.Error("Failed to get user from username",
