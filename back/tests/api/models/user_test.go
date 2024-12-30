@@ -37,9 +37,9 @@ func TestUserCreate(t *testing.T) {
 	api.SetUpRoutes(e, queries)
 
 	userData := models.UserCreateParams{
-		Username:  "test",
-		Email:     "test",
-		Password:  "test",
+		Username:  "test_user",
+		Email:     "test@example.com",
+		Password:  "test123",
 		Firstname: "test",
 		Lastname:  "test",
 	}
