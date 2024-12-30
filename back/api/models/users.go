@@ -17,8 +17,8 @@ type UserCreateParams struct {
 	Username  string `json:"username" validate:"required,min=5,max=20,alphanum"`
 	Email     string `json:"email" validate:"required,email"`
 	Password  string `json:"password" validate:"required,min=5,max=20,alphanum"`
-	Firstname string `json:"firstname" validate:"required,max=20,alphanum"`
-	Lastname  string `json:"lastname" validate:"required,max=20,alphanum"`
+	Firstname string `json:"firstname" validate:"required,max=20,alpha"`
+	Lastname  string `json:"lastname" validate:"required,max=20,alpha"`
 }
 
 func (h *UserHandler) Create(c echo.Context) error {
