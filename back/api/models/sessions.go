@@ -17,8 +17,8 @@ type SessionHandler struct {
 }
 
 type SessionCreateParams struct {
-	Username string `json:"username"`
-	Password string `json:"password"`
+	Username string `json:"username" validate:"required"`
+	Password string `json:"password" validate:"required"`
 }
 
 func (h *SessionHandler) Create(c echo.Context) error {
@@ -26,6 +26,15 @@ func (h *SessionHandler) Create(c echo.Context) error {
 	err := c.Bind(&loginParams)
 	if err != nil {
 		return echo.ErrBadRequest
+	}
+
+	err = c.Validate(loginParams)
+	if err != nil {
+		slog.Error("Failed to validate login params",
+			"error", err.Error())
+		return c.JSON(http.StatusBadRequest, map[string]string{
+			"error": err.Error(),
+		})
 	}
 
 	userData, err := h.Queries.GetUserFromUsername(c.Request().Context(), loginParams.Username)
