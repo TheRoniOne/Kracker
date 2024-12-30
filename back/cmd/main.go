@@ -6,6 +6,7 @@ import (
 	"log/slog"
 	"net/url"
 	"os"
+	"time"
 
 	"github.com/TheRoniOne/Kracker/api"
 	"github.com/TheRoniOne/Kracker/db/sqlc"
@@ -48,6 +49,15 @@ func main() {
 
 	queries := sqlc.New(dbPool)
 	api.SetUpRoutes(e, queries)
+
+	go func() {
+		ticker := time.NewTicker(1 * time.Minute)
+		defer ticker.Stop()
+
+		for range ticker.C {
+			queries.DeleteExpiredSessions(context.Background())
+		}
+	}()
 
 	<-exitChannel
 }
