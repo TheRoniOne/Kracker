@@ -63,3 +63,37 @@ func TestSessionCreate(t *testing.T) {
 		assert.NoError(t, err)
 	}
 }
+
+func TestSessionCreateShouldFail(t *testing.T) {
+	ctx := context.Background()
+	connStr := utils.SetUpTestWithDB(ctx, t)
+
+	dbPool, err := pgxpool.New(context.Background(), connStr)
+	require.NoError(t, err)
+
+	e := echo.New()
+	queries := sqlc.New(dbPool)
+
+	serverURL := utils.StartTestServer(e)
+	require.NotEmpty(t, serverURL)
+	defer e.Close()
+
+	api.SetUpRoutes(e, queries)
+
+	UserBuilder := builders.NewUserBuilder(queries).Username("test").Password("test")
+	UserBuilder.CreateOne()
+
+	createSessionParams := models.SessionCreateParams{
+		Username: "test",
+	}
+
+	body, err := json.Marshal(createSessionParams)
+	require.NoError(t, err)
+
+	apiClient := utils.NewLoggedInAPIClient(serverURL, "test", "test")
+	response, err := apiClient.Post("/api/session", echo.MIMEApplicationJSON, body)
+	require.NoError(t, err)
+
+	require.Equal(t, http.StatusBadRequest, response.StatusCode)
+	require.Contains(t, string(utils.ReadRespBody(response)), `Error:Field validation for 'Password' failed on the 'required' tag`)
+}

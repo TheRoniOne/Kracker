@@ -17,8 +17,8 @@ type SessionHandler struct {
 }
 
 type SessionCreateParams struct {
-	Username string `json:"username"`
-	Password string `json:"password"`
+	Username string `json:"username" validate:"required"`
+	Password string `json:"password" validate:"required"`
 }
 
 func (h *SessionHandler) Create(c echo.Context) error {
