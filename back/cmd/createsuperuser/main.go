@@ -41,15 +41,14 @@ func main() {
 	email := internal.GetInput("Email")
 	password := internal.GetInput("Password")
 
-	user := sqlc.CreateUserParams{
-		Username:   username,
-		Email:      email,
-		SaltedHash: password,
-		IsAdmin:    true,
+	user := internal.CreateUserParams{
+		Username:                 username,
+		Email:                    email,
+		UpdateUserPasswordParams: &internal.UpdateUserPasswordParams{Password: password},
 	}
 
 	queries := sqlc.New(dbPool)
-	err := internal.CreateUser(user, queries)
+	err := internal.CreateUser(queries, user, true)
 	if err != nil {
 		slog.Error("Failed to create superuser",
 			"error", err)

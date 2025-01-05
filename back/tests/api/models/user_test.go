@@ -9,9 +9,9 @@ import (
 	"testing"
 
 	"github.com/TheRoniOne/Kracker/api"
-	"github.com/TheRoniOne/Kracker/api/models"
 	"github.com/TheRoniOne/Kracker/db/builders"
 	"github.com/TheRoniOne/Kracker/db/sqlc"
+	"github.com/TheRoniOne/Kracker/internal"
 	"github.com/TheRoniOne/Kracker/tests/utils"
 	"github.com/alexedwards/argon2id"
 	"github.com/jackc/pgx/v5/pgxpool"
@@ -36,12 +36,14 @@ func TestUserCreate(t *testing.T) {
 
 	api.SetUpRoutes(e, queries)
 
-	userData := models.UserCreateParams{
+	userData := internal.CreateUserParams{
 		Username:  "testUser",
 		Email:     "test@example.com",
-		Password:  "test123!",
 		Firstname: "test",
 		Lastname:  "test",
+		UpdateUserPasswordParams: &internal.UpdateUserPasswordParams{
+			Password: "test123!",
+		},
 	}
 
 	body, _ := json.Marshal(userData)
