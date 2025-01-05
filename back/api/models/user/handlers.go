@@ -4,6 +4,8 @@ import (
 	"log/slog"
 	"net/http"
 
+	"github.com/TheRoniOne/Kracker/api/models"
+
 	"github.com/TheRoniOne/Kracker/db/sqlc"
 	"github.com/TheRoniOne/Kracker/internal"
 	"github.com/jackc/pgx/v5/pgtype"
@@ -89,6 +91,7 @@ func (h *Handler) Update(c echo.Context) error {
 	}
 
 	updatedUser, err := h.Queries.UpdateUser(c.Request().Context(), sqlc.UpdateUserParams{
+		ID:         models.GetUserID(c),
 		Email:      params.Email,
 		Firstname:  params.Firstname,
 		Lastname:   params.Lastname,

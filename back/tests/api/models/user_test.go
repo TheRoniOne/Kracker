@@ -109,33 +109,28 @@ func TestUserUpdate(t *testing.T) {
 
 	api.SetUpRoutes(e, queries)
 
-	userData := user.CreateUserParams{
-		Username:  "testUser",
-		Email:     "test@example.com",
-		Firstname: "test",
-		Lastname:  "test",
-		Password:  "test123!",
-	}
+	username := "test"
+	password := "test"
+	UserBuilder := builders.NewUserBuilder(queries).Username(username).Password(password)
+	UserBuilder.CreateOne()
+
+	newPassword := "test123!"
+	userData := user.UpdateUserParams{}
+	err := userData.Password.Scan(newPassword)
+	require.NoError(t, err)
 
 	body, _ := json.Marshal(userData)
 
-	apiClient := utils.NewAPIClient(serverURL)
-	response, err := apiClient.Post("/api/user", echo.MIMEApplicationJSON, body)
+	apiClient := utils.NewLoggedInAPIClient(serverURL, username, "test")
+	response, err := apiClient.Patch("/api/user", echo.MIMEApplicationJSON, body)
 	require.NoError(t, err)
 
 	if assert.Equal(t, http.StatusCreated, response.StatusCode) {
 		users, _ := queries.ListUsers(ctx)
 		assert.Len(t, users, 1)
 
-		user := users[0]
-		assert.Equal(t, userData.Username, user.Username)
-		assert.Equal(t, userData.Email, user.Email)
-		assert.Equal(t, userData.Firstname, user.Firstname)
-		assert.Equal(t, userData.Lastname, user.Lastname)
-		assert.False(t, user.IsAdmin)
-
-		userDBData, _ := queries.GetUserFromUsername(ctx, userData.Username)
-		isOk, _ := argon2id.ComparePasswordAndHash(userData.Password, userDBData.SaltedHash)
+		userDBData, _ := queries.GetUserFromUsername(ctx, username)
+		isOk, _ := argon2id.ComparePasswordAndHash(newPassword, userDBData.SaltedHash)
 		assert.True(t, isOk)
 	}
 }
