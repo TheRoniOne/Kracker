@@ -7,6 +7,8 @@ package sqlc
 
 import (
 	"context"
+
+	"github.com/jackc/pgx/v5/pgtype"
 )
 
 const createUser = `-- name: CreateUser :one
@@ -147,33 +149,48 @@ func (q *Queries) ListUsers(ctx context.Context) ([]ListUsersRow, error) {
 	return items, nil
 }
 
-const updateUser = `-- name: UpdateUser :exec
+const updateUser = `-- name: UpdateUser :one
 UPDATE Users
-  set username = $2,
-  email = $3,
-  salted_hash = $4,
-  firstname = $5,
-  lastname = $6
-WHERE id = $1
+  set updated_at = now(),
+  username = COALESCE($1, username),
+  email = COALESCE($2, email),
+  salted_hash = COALESCE($3, salted_hash),
+  firstname = COALESCE($4, firstname),
+  lastname = COALESCE($5, lastname),
+  is_admin = COALESCE($6, is_admin)
+WHERE id = $7
+RETURNING id, username, email, salted_hash, firstname, lastname, is_admin
 `
 
 type UpdateUserParams struct {
-	ID         int64  `json:"id"`
-	Username   string `json:"username"`
-	Email      string `json:"email"`
-	SaltedHash string `json:"salted_hash"`
-	Firstname  string `json:"firstname"`
-	Lastname   string `json:"lastname"`
+	Username   pgtype.Text `json:"username"`
+	Email      pgtype.Text `json:"email"`
+	SaltedHash pgtype.Text `json:"salted_hash"`
+	Firstname  pgtype.Text `json:"firstname"`
+	Lastname   pgtype.Text `json:"lastname"`
+	IsAdmin    pgtype.Bool `json:"is_admin"`
+	ID         int64       `json:"id"`
 }
 
-func (q *Queries) UpdateUser(ctx context.Context, arg UpdateUserParams) error {
-	_, err := q.db.Exec(ctx, updateUser,
-		arg.ID,
+func (q *Queries) UpdateUser(ctx context.Context, arg UpdateUserParams) (User, error) {
+	row := q.db.QueryRow(ctx, updateUser,
 		arg.Username,
 		arg.Email,
 		arg.SaltedHash,
 		arg.Firstname,
 		arg.Lastname,
+		arg.IsAdmin,
+		arg.ID,
 	)
-	return err
+	var i User
+	err := row.Scan(
+		&i.ID,
+		&i.Username,
+		&i.Email,
+		&i.SaltedHash,
+		&i.Firstname,
+		&i.Lastname,
+		&i.IsAdmin,
+	)
+	return i, err
 }
