@@ -9,6 +9,7 @@ import (
 	"time"
 
 	"github.com/TheRoniOne/Kracker/internal"
+	"github.com/jackc/pgx/v5/pgxpool"
 	"github.com/stretchr/testify/require"
 	"github.com/testcontainers/testcontainers-go"
 	"github.com/testcontainers/testcontainers-go/modules/postgres"
@@ -33,7 +34,7 @@ func init() {
 	}
 }
 
-func SetUpTestWithDB(ctx context.Context, t *testing.T) string {
+func SetUpTestDBPool(ctx context.Context, t *testing.T) *pgxpool.Pool {
 	pgContainer, err := postgres.Run(ctx,
 		"postgres:17-alpine",
 		postgres.WithInitScripts(Migrations...),
@@ -57,5 +58,8 @@ func SetUpTestWithDB(ctx context.Context, t *testing.T) string {
 	connStr, err := pgContainer.ConnectionString(ctx, "sslmode=disable")
 	require.NoError(t, err)
 
-	return connStr
+	dbPool, err := pgxpool.New(context.Background(), connStr)
+	require.NoError(t, err)
+
+	return dbPool
 }
