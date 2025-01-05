@@ -16,7 +16,7 @@ type UserHandler struct {
 type UserCreateParams struct {
 	Username  string `json:"username" validate:"required,min=5,max=20,alphanum"`
 	Email     string `json:"email" validate:"required,email"`
-	Password  string `json:"password" validate:"required,min=5,max=20,alphanum"`
+	Password  string `json:"password" validate:"required,min=5,max=20,ascii"`
 	Firstname string `json:"firstname" validate:"required,max=20,alpha"`
 	Lastname  string `json:"lastname" validate:"required,max=20,alpha"`
 }

@@ -39,7 +39,7 @@ func TestUserCreate(t *testing.T) {
 	userData := models.UserCreateParams{
 		Username:  "testUser",
 		Email:     "test@example.com",
-		Password:  "test123",
+		Password:  "test123!",
 		Firstname: "test",
 		Lastname:  "test",
 	}
