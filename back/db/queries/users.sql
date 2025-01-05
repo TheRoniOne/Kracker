@@ -19,8 +19,7 @@ RETURNING *;
 
 -- name: UpdateUser :one
 UPDATE Users
-  set updated_at = now(),
-  username = COALESCE(sqlc.narg('username'), username),
+  set username = COALESCE(sqlc.narg('username'), username),
   email = COALESCE(sqlc.narg('email'), email),
   salted_hash = COALESCE(sqlc.narg('salted_hash'), salted_hash),
   firstname = COALESCE(sqlc.narg('firstname'), firstname),

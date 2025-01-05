@@ -151,8 +151,7 @@ func (q *Queries) ListUsers(ctx context.Context) ([]ListUsersRow, error) {
 
 const updateUser = `-- name: UpdateUser :one
 UPDATE Users
-  set updated_at = now(),
-  username = COALESCE($1, username),
+  set username = COALESCE($1, username),
   email = COALESCE($2, email),
   salted_hash = COALESCE($3, salted_hash),
   firstname = COALESCE($4, firstname),

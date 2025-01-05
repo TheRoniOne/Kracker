@@ -112,7 +112,7 @@ func TestUserUpdate(t *testing.T) {
 	username := "test"
 	password := "test"
 	UserBuilder := builders.NewUserBuilder(queries).Username(username).Password(password)
-	UserBuilder.CreateOne()
+	originalUser := UserBuilder.CreateOne()
 
 	newPassword := "test123!"
 	userData := user.UpdateUserParams{}
@@ -125,12 +125,14 @@ func TestUserUpdate(t *testing.T) {
 	response, err := apiClient.Patch("/api/user", echo.MIMEApplicationJSON, body)
 	require.NoError(t, err)
 
-	if assert.Equal(t, http.StatusCreated, response.StatusCode) {
+	if assert.Equal(t, http.StatusOK, response.StatusCode) {
 		users, _ := queries.ListUsers(ctx)
 		assert.Len(t, users, 1)
 
 		userDBData, _ := queries.GetUserFromUsername(ctx, username)
 		isOk, _ := argon2id.ComparePasswordAndHash(newPassword, userDBData.SaltedHash)
 		assert.True(t, isOk)
+
+		assert.Equal(t, originalUser.Email, userDBData.Email)
 	}
 }

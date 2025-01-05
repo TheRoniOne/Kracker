@@ -18,10 +18,10 @@ type CreateUserParams struct {
 }
 
 type UpdateUserParams struct {
-	Email     pgtype.Text `json:"email" validate:"omitnil,email"`
-	Firstname pgtype.Text `json:"firstname" validate:"omitnil,max=20,alpha"`
-	Lastname  pgtype.Text `json:"lastname" validate:"omitnil,max=20,alpha"`
-	Password  pgtype.Text `json:"password" validate:"omitnil,min=5,max=20,ascii"`
+	Email     pgtype.Text `json:"email,omitempty" validate:"omitempty,email"`
+	Firstname pgtype.Text `json:"firstname,omitempty" validate:"omitempty,max=20,alpha"`
+	Lastname  pgtype.Text `json:"lastname,omitempty" validate:"omitempty,max=20,alpha"`
+	Password  pgtype.Text `json:"password,omitempty" validate:"omitempty,min=5,max=20,ascii"`
 }
 
 func CreateUser(queries *sqlc.Queries, user CreateUserParams, isAdmin bool) error {
