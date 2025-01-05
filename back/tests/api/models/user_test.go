@@ -9,7 +9,7 @@ import (
 	"testing"
 
 	"github.com/TheRoniOne/Kracker/api"
-	"github.com/TheRoniOne/Kracker/api/models"
+	"github.com/TheRoniOne/Kracker/api/models/user"
 	"github.com/TheRoniOne/Kracker/db/builders"
 	"github.com/TheRoniOne/Kracker/db/sqlc"
 	"github.com/TheRoniOne/Kracker/tests/utils"
@@ -36,7 +36,7 @@ func TestUserCreate(t *testing.T) {
 
 	api.SetUpRoutes(e, queries)
 
-	userData := models.CreateUserParams{
+	userData := user.CreateUserParams{
 		Username:  "testUser",
 		Email:     "test@example.com",
 		Firstname: "test",
@@ -47,7 +47,7 @@ func TestUserCreate(t *testing.T) {
 	body, _ := json.Marshal(userData)
 
 	apiClient := utils.NewAPIClient(serverURL)
-	response, err := apiClient.Post("/api/user/create", echo.MIMEApplicationJSON, body)
+	response, err := apiClient.Post("/api/user", echo.MIMEApplicationJSON, body)
 	require.NoError(t, err)
 
 	if assert.Equal(t, http.StatusCreated, response.StatusCode) {

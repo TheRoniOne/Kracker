@@ -7,7 +7,7 @@ import (
 	"net/http/cookiejar"
 	"strings"
 
-	"github.com/TheRoniOne/Kracker/api/models"
+	"github.com/TheRoniOne/Kracker/api/models/session"
 	"github.com/labstack/echo/v4"
 )
 
@@ -44,7 +44,7 @@ func NewAPIClient(baseURL string) *APIClient {
 func NewLoggedInAPIClient(baseURL, username, password string) *APIClient {
 	client := NewAPIClient(baseURL)
 
-	createSessionParams := models.SessionCreateParams{
+	createSessionParams := session.CreateParams{
 		Username: username,
 		Password: password,
 	}

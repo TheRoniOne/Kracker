@@ -7,7 +7,7 @@ import (
 	"testing"
 
 	"github.com/TheRoniOne/Kracker/api"
-	"github.com/TheRoniOne/Kracker/api/models"
+	"github.com/TheRoniOne/Kracker/api/models/session"
 	"github.com/TheRoniOne/Kracker/db/builders"
 	"github.com/TheRoniOne/Kracker/db/sqlc"
 	"github.com/TheRoniOne/Kracker/tests/utils"
@@ -37,7 +37,7 @@ func TestSessionCreate(t *testing.T) {
 	UserBuilder := builders.NewUserBuilder(queries).Username("test").Password("test")
 	UserBuilder.CreateOne()
 
-	createSessionParams := models.SessionCreateParams{
+	createSessionParams := session.CreateParams{
 		Username: "test",
 		Password: "test",
 	}
@@ -83,7 +83,7 @@ func TestSessionCreateShouldFail(t *testing.T) {
 	UserBuilder := builders.NewUserBuilder(queries).Username("test").Password("test")
 	UserBuilder.CreateOne()
 
-	createSessionParams := models.SessionCreateParams{
+	createSessionParams := session.CreateParams{
 		Username: "test",
 	}
 
