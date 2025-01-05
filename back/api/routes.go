@@ -3,7 +3,8 @@ package api
 import (
 	"net/http"
 
-	"github.com/TheRoniOne/Kracker/api/models"
+	"github.com/TheRoniOne/Kracker/api/models/session"
+	"github.com/TheRoniOne/Kracker/api/models/user"
 	"github.com/TheRoniOne/Kracker/db/sqlc"
 	"github.com/TheRoniOne/Kracker/middleware"
 	"github.com/labstack/echo/v4"
@@ -19,11 +20,12 @@ func SetUpRoutes(app *echo.Echo, queries *sqlc.Queries) {
 	sessionMiddleware := middleware.SessionMiddleware{Queries: queries}
 	protected := group.Group("", sessionMiddleware.Handle)
 
-	sessionHandler := models.SessionHandler{Queries: queries}
+	sessionHandler := session.Handler{Queries: queries}
 	group.POST("/session", sessionHandler.Create)
 	group.DELETE("/session", sessionHandler.Delete)
 
-	userHandler := models.UserHandler{Queries: queries}
-	group.POST("/user/create", userHandler.Create)
+	userHandler := user.Handler{Queries: queries}
+	group.POST("/user", userHandler.Create)
 	protected.GET("/user/list", userHandler.List)
+	protected.PATCH("/user", userHandler.Update)
 }

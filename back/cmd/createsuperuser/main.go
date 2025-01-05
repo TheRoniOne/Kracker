@@ -7,6 +7,7 @@ import (
 	"net/url"
 	"os"
 
+	"github.com/TheRoniOne/Kracker/api/models/user"
 	"github.com/TheRoniOne/Kracker/db/sqlc"
 	"github.com/TheRoniOne/Kracker/internal"
 	"github.com/jackc/pgx/v5/pgxpool"
@@ -41,15 +42,14 @@ func main() {
 	email := internal.GetInput("Email")
 	password := internal.GetInput("Password")
 
-	user := sqlc.CreateUserParams{
-		Username:   username,
-		Email:      email,
-		SaltedHash: password,
-		IsAdmin:    true,
+	params := user.CreateUserParams{
+		Username: username,
+		Email:    email,
+		Password: password,
 	}
 
 	queries := sqlc.New(dbPool)
-	err := internal.CreateUser(user, queries)
+	err := user.CreateUser(queries, params, true)
 	if err != nil {
 		slog.Error("Failed to create superuser",
 			"error", err)

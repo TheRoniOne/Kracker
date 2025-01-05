@@ -7,12 +7,11 @@ import (
 	"testing"
 
 	"github.com/TheRoniOne/Kracker/api"
-	"github.com/TheRoniOne/Kracker/api/models"
+	"github.com/TheRoniOne/Kracker/api/models/session"
 	"github.com/TheRoniOne/Kracker/db/builders"
 	"github.com/TheRoniOne/Kracker/db/sqlc"
 	"github.com/TheRoniOne/Kracker/tests/utils"
 	"github.com/jackc/pgx/v5/pgtype"
-	"github.com/jackc/pgx/v5/pgxpool"
 	"github.com/labstack/echo/v4"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
@@ -20,10 +19,7 @@ import (
 
 func TestSessionCreate(t *testing.T) {
 	ctx := context.Background()
-	connStr := utils.SetUpTestWithDB(ctx, t)
-
-	dbPool, err := pgxpool.New(context.Background(), connStr)
-	require.NoError(t, err)
+	dbPool := utils.SetUpTestDBPool(ctx, t)
 
 	e := echo.New()
 	queries := sqlc.New(dbPool)
@@ -37,7 +33,7 @@ func TestSessionCreate(t *testing.T) {
 	UserBuilder := builders.NewUserBuilder(queries).Username("test").Password("test")
 	UserBuilder.CreateOne()
 
-	createSessionParams := models.SessionCreateParams{
+	createSessionParams := session.CreateParams{
 		Username: "test",
 		Password: "test",
 	}
@@ -66,10 +62,7 @@ func TestSessionCreate(t *testing.T) {
 
 func TestSessionCreateShouldFail(t *testing.T) {
 	ctx := context.Background()
-	connStr := utils.SetUpTestWithDB(ctx, t)
-
-	dbPool, err := pgxpool.New(context.Background(), connStr)
-	require.NoError(t, err)
+	dbPool := utils.SetUpTestDBPool(ctx, t)
 
 	e := echo.New()
 	queries := sqlc.New(dbPool)
@@ -83,7 +76,7 @@ func TestSessionCreateShouldFail(t *testing.T) {
 	UserBuilder := builders.NewUserBuilder(queries).Username("test").Password("test")
 	UserBuilder.CreateOne()
 
-	createSessionParams := models.SessionCreateParams{
+	createSessionParams := session.CreateParams{
 		Username: "test",
 	}
 

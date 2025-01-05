@@ -1,4 +1,4 @@
-package models
+package session
 
 import (
 	"log/slog"
@@ -12,17 +12,12 @@ import (
 	"github.com/labstack/echo/v4"
 )
 
-type SessionHandler struct {
+type Handler struct {
 	Queries *sqlc.Queries
 }
 
-type SessionCreateParams struct {
-	Username string `json:"username" validate:"required"`
-	Password string `json:"password" validate:"required"`
-}
-
-func (h *SessionHandler) Create(c echo.Context) error {
-	var loginParams SessionCreateParams
+func (h *Handler) Create(c echo.Context) error {
+	var loginParams CreateParams
 	err := c.Bind(&loginParams)
 	if err != nil {
 		return echo.ErrBadRequest
@@ -84,7 +79,7 @@ func (h *SessionHandler) Create(c echo.Context) error {
 	return c.String(http.StatusOK, "Logged in successfully")
 }
 
-func (h *SessionHandler) Delete(c echo.Context) error {
+func (h *Handler) Delete(c echo.Context) error {
 	s, err := c.Cookie("SESSION")
 	if err != nil {
 		slog.Error("Failed to get session ID from cookies")

@@ -9,12 +9,11 @@ import (
 	"testing"
 
 	"github.com/TheRoniOne/Kracker/api"
-	"github.com/TheRoniOne/Kracker/api/models"
+	"github.com/TheRoniOne/Kracker/api/models/user"
 	"github.com/TheRoniOne/Kracker/db/builders"
 	"github.com/TheRoniOne/Kracker/db/sqlc"
 	"github.com/TheRoniOne/Kracker/tests/utils"
 	"github.com/alexedwards/argon2id"
-	"github.com/jackc/pgx/v5/pgxpool"
 	"github.com/labstack/echo/v4"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
@@ -22,10 +21,7 @@ import (
 
 func TestUserCreate(t *testing.T) {
 	ctx := context.Background()
-	connStr := utils.SetUpTestWithDB(ctx, t)
-
-	dbPool, err := pgxpool.New(context.Background(), connStr)
-	require.NoError(t, err)
+	dbPool := utils.SetUpTestDBPool(ctx, t)
 
 	e := echo.New()
 	queries := sqlc.New(dbPool)
@@ -36,18 +32,18 @@ func TestUserCreate(t *testing.T) {
 
 	api.SetUpRoutes(e, queries)
 
-	userData := models.UserCreateParams{
+	userData := user.CreateUserParams{
 		Username:  "testUser",
 		Email:     "test@example.com",
-		Password:  "test123!",
 		Firstname: "test",
 		Lastname:  "test",
+		Password:  "test123!",
 	}
 
 	body, _ := json.Marshal(userData)
 
 	apiClient := utils.NewAPIClient(serverURL)
-	response, err := apiClient.Post("/api/user/create", echo.MIMEApplicationJSON, body)
+	response, err := apiClient.Post("/api/user", echo.MIMEApplicationJSON, body)
 	require.NoError(t, err)
 
 	if assert.Equal(t, http.StatusCreated, response.StatusCode) {
@@ -69,10 +65,7 @@ func TestUserCreate(t *testing.T) {
 
 func TestUserList(t *testing.T) {
 	ctx := context.Background()
-	connStr := utils.SetUpTestWithDB(ctx, t)
-
-	dbPool, err := pgxpool.New(context.Background(), connStr)
-	require.NoError(t, err)
+	dbPool := utils.SetUpTestDBPool(ctx, t)
 
 	e := echo.New()
 	queries := sqlc.New(dbPool)
@@ -100,5 +93,46 @@ func TestUserList(t *testing.T) {
 		json.Compact(actual, utils.ReadRespBody(response))
 
 		assert.Equal(t, string(expected), fmt.Sprint(actual))
+	}
+}
+
+func TestUserUpdate(t *testing.T) {
+	ctx := context.Background()
+	dbPool := utils.SetUpTestDBPool(ctx, t)
+
+	e := echo.New()
+	queries := sqlc.New(dbPool)
+
+	serverURL := utils.StartTestServer(e)
+	require.NotEmpty(t, serverURL)
+	defer e.Close()
+
+	api.SetUpRoutes(e, queries)
+
+	username := "test"
+	password := "test"
+	UserBuilder := builders.NewUserBuilder(queries).Username(username).Password(password)
+	originalUser := UserBuilder.CreateOne()
+
+	newPassword := "test123!"
+	userData := user.UpdateUserParams{}
+	err := userData.Password.Scan(newPassword)
+	require.NoError(t, err)
+
+	body, _ := json.Marshal(userData)
+
+	apiClient := utils.NewLoggedInAPIClient(serverURL, username, "test")
+	response, err := apiClient.Patch("/api/user", echo.MIMEApplicationJSON, body)
+	require.NoError(t, err)
+
+	if assert.Equal(t, http.StatusOK, response.StatusCode) {
+		users, _ := queries.ListUsers(ctx)
+		assert.Len(t, users, 1)
+
+		userDBData, _ := queries.GetUserFromUsername(ctx, username)
+		isOk, _ := argon2id.ComparePasswordAndHash(newPassword, userDBData.SaltedHash)
+		assert.True(t, isOk)
+
+		assert.Equal(t, originalUser.Email, userDBData.Email)
 	}
 }

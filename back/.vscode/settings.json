@@ -4,5 +4,9 @@
     "formatting.gofumpt": true
   },
   "go.lintTool": "golangci-lint",
-  "go.lintFlags": ["--fast"]
+  "go.lintFlags": ["--fast"],
+  "[sql]": {
+    "editor.formatOnSave": false,
+    "editor.defaultFormatter": null
+  }
 }

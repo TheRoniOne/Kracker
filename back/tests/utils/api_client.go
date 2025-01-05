@@ -1,13 +1,14 @@
 package utils
 
 import (
+	"bytes"
 	"encoding/json"
 	"log/slog"
 	"net/http"
 	"net/http/cookiejar"
 	"strings"
 
-	"github.com/TheRoniOne/Kracker/api/models"
+	"github.com/TheRoniOne/Kracker/api/models/session"
 	"github.com/labstack/echo/v4"
 )
 
@@ -44,7 +45,7 @@ func NewAPIClient(baseURL string) *APIClient {
 func NewLoggedInAPIClient(baseURL, username, password string) *APIClient {
 	client := NewAPIClient(baseURL)
 
-	createSessionParams := models.SessionCreateParams{
+	createSessionParams := session.CreateParams{
 		Username: username,
 		Password: password,
 	}
@@ -75,5 +76,25 @@ func (c *APIClient) Get(path string) (*http.Response, error) {
 }
 
 func (c *APIClient) Post(path string, contentType string, body []byte) (*http.Response, error) {
-	return c.Client.Post(c.MakeURL(path), contentType, strings.NewReader(string(body)))
+	return c.Client.Post(c.MakeURL(path), contentType, bytes.NewBuffer(body))
+}
+
+func (c *APIClient) Patch(path string, contentType string, body []byte) (*http.Response, error) {
+	req, err := http.NewRequest("PATCH", c.MakeURL(path), bytes.NewBuffer(body))
+	if err != nil {
+		panic(err)
+	}
+
+	req.Header.Set("Content-Type", contentType)
+
+	return c.Client.Do(req)
+}
+
+func (c *APIClient) Delete(path string) (*http.Response, error) {
+	req, err := http.NewRequest("DELETE", c.MakeURL(path), nil)
+	if err != nil {
+		panic(err)
+	}
+
+	return c.Client.Do(req)
 }

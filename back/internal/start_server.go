@@ -5,7 +5,6 @@ import (
 	"net/http"
 
 	"github.com/TheRoniOne/Kracker/middleware"
-	"github.com/go-playground/validator/v10"
 	"github.com/labstack/echo/v4"
 	echomiddleware "github.com/labstack/echo/v4/middleware"
 )
@@ -13,7 +12,7 @@ import (
 func StartServer(e *echo.Echo, address string, exit chan bool) {
 	e.Debug = Debug
 
-	e.Validator = &CustomValidator{validator: validator.New(validator.WithRequiredStructEnabled())}
+	e.Validator = NewValidator()
 
 	e.Use(echomiddleware.CSRFWithConfig(echomiddleware.CSRFConfig{
 		TokenLookup:    "cookie:_csrf",

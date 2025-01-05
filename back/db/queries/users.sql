@@ -17,14 +17,16 @@ INSERT INTO Users (
 )
 RETURNING *;
 
--- name: UpdateUser :exec
+-- name: UpdateUser :one
 UPDATE Users
-  set username = $2,
-  email = $3,
-  salted_hash = $4,
-  firstname = $5,
-  lastname = $6
-WHERE id = $1;
+  set username = COALESCE(sqlc.narg('username'), username),
+  email = COALESCE(sqlc.narg('email'), email),
+  salted_hash = COALESCE(sqlc.narg('salted_hash'), salted_hash),
+  firstname = COALESCE(sqlc.narg('firstname'), firstname),
+  lastname = COALESCE(sqlc.narg('lastname'), lastname),
+  is_admin = COALESCE(sqlc.narg('is_admin'), is_admin)
+WHERE id = sqlc.arg('id')
+RETURNING *;
 
 -- name: DeleteUser :exec
 DELETE FROM Users
